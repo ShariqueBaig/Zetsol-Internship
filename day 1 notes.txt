@@ -1,0 +1,19 @@
+ai avatar with lip syncing capabilities with voice (gemini)
+
+SRS with tools and research. Preffered free. use your own tech stack with diagrams
+
+use gemini ( can use mcp) to read database optimally, make consice summary for doctor taking in patient history to pottentialy get insights
+
+Create 50-150 dummy data for POC
+
+Kaif
+
+My assumptions:
+1)i am assuming the client is from US/Europe therefore HIPPA and GDPR applies
+2)google STT and TTS is the best but i have had troubles in past while working with it
+3)i have added additional things like rate limiter and cache which are optional for mvp but necessary in a real application
+ for efficiency and security
+4)In my ERD i assumed that each session results in 0-1 prescription and transcript but this might be wrong as what if a session gets disturbed
+ due to some issue so there can be fragments of transcripts (i.e multiple transcripts). I will need your suggestions for this
+5)POC video for AI Avatar a) https://www.youtube.com/watch?v=egQFAeu6Ihw
+ 			  b)https://www.youtube.com/watch?v=Th2qfbbq3uE

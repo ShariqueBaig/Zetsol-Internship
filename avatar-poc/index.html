@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAssist AI - Avatar POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #4fc3f7;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        /* Avatar Container */
+        .avatar-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #4fc3f7, #0288d1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(79, 195, 247, 0.3);
+            overflow: hidden;
+        }
+
+        /* Face */
+        .face {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        /* Eyes */
+        .eyes {
+            display: flex;
+            justify-content: space-between;
+            width: 80px;
+            margin: 0 auto;
+            padding-top: 20px;
+        }
+
+        .eye {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .eye::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+        }
+
+        /* Mouth - Idle State */
+        .mouth {
+            width: 40px;
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            margin: 30px auto 0;
+            transition: all 0.1s ease;
+        }
+
+        /* Mouth - Talking State */
+        .avatar.talking .mouth {
+            animation: talk 0.15s infinite alternate;
+        }
+
+        @keyframes talk {
+            0% {
+                height: 8px;
+                width: 40px;
+                border-radius: 10px;
+            }
+            50% {
+                height: 25px;
+                width: 35px;
+                border-radius: 50%;
+            }
+            100% {
+                height: 15px;
+                width: 30px;
+                border-radius: 50%;
+            }
+        }
+
+        /* Pulse effect when talking */
+        .avatar.talking {
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                box-shadow: 0 10px 40px rgba(79, 195, 247, 0.3);
+            }
+            to {
+                box-shadow: 0 10px 60px rgba(79, 195, 247, 0.6);
+            }
+        }
+
+        /* Status indicator */
+        .status {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .status.idle {
+            color: #888;
+        }
+
+        .status.talking {
+            color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.2);
+        }
+
+        /* Input area */
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1rem;
+            resize: none;
+            height: 80px;
+        }
+
+        textarea::placeholder {
+            color: #666;
+        }
+
+        textarea:focus {
+            outline: 2px solid #4fc3f7;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4fc3f7, #0288d1);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(79, 195, 247, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Quick responses */
+        .quick-responses {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .quick-btn {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .quick-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+        }
+
+        .note {
+            margin-top: 30px;
+            font-size: 0.75rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MedAssist AI Avatar</h1>
+        <p class="subtitle">Fake Lip Sync POC</p>
+
+        <div class="avatar-container">
+            <div class="avatar" id="avatar">
+                <div class="face">
+                    <div class="eyes">
+                        <div class="eye"></div>
+                        <div class="eye"></div>
+                    </div>
+                    <div class="mouth"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status idle" id="status">Idle - Ready to speak</div>
+
+        <div class="input-area">
+            <textarea 
+                id="textInput" 
+                placeholder="Type what the AI should say..."
+            >Hello! I'm your virtual health assistant. How can I help you today?</textarea>
+            <button id="speakBtn" onclick="speak()">🎤 Speak</button>
+        </div>
+
+        <div class="quick-responses">
+            <button class="quick-btn" onclick="quickSpeak('Hello! How are you feeling today?')">Greeting</button>
+            <button class="quick-btn" onclick="quickSpeak('I understand. Can you tell me more about your symptoms?')">Ask Symptoms</button>
+            <button class="quick-btn" onclick="quickSpeak('Based on what you described, I recommend seeing a general physician.')">Recommend</button>
+        </div>
+
+        <p class="note">Uses browser's built-in Text-to-Speech. Avatar animates while audio plays.</p>
+    </div>
+
+    <script>
+        const avatar = document.getElementById('avatar');
+        const status = document.getElementById('status');
+        const textInput = document.getElementById('textInput');
+        const speakBtn = document.getElementById('speakBtn');
+
+        // Check for speech synthesis support
+        if (!('speechSynthesis' in window)) {
+            alert('Sorry, your browser does not support Text-to-Speech.');
+        }
+
+        function speak() {
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Configure voice
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            // Try to use a nice voice
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => 
+                v.name.includes('Google') || 
+                v.name.includes('Microsoft') ||
+                v.name.includes('Samantha')
+            );
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+
+            // Event: Start speaking
+            utterance.onstart = () => {
+                avatar.classList.add('talking');
+                status.textContent = '🗣️ Speaking...';
+                status.className = 'status talking';
+                speakBtn.disabled = true;
+            };
+
+            // Event: Stop speaking
+            utterance.onend = () => {
+                avatar.classList.remove('talking');
+                status.textContent = 'Idle - Ready to speak';
+                status.className = 'status idle';
+                speakBtn.disabled = false;
+            };
+
+            // Event: Error
+            utterance.onerror = () => {
+                avatar.classList.remove('talking');
+                status.textContent = 'Error - Try again';
+                status.className = 'status idle';
+                speakBtn.disabled = false;
+            };
+
+            // Speak!
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function quickSpeak(text) {
+            textInput.value = text;
+            speak();
+        }
+
+        // Load voices (some browsers need this)
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
+    </script>
+</body>
+</html>
