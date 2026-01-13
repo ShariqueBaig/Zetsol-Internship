@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,345 +14,619 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             color: white;
-        }
-
-        .container {
-            text-align: center;
-            max-width: 400px;
             padding: 20px;
         }
 
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         h1 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #4fc3f7;
+            font-size: 1.8rem;
+            color: #38bdf8;
+            margin-bottom: 5px;
         }
 
         .subtitle {
-            font-size: 0.9rem;
-            color: #888;
-            margin-bottom: 30px;
+            font-size: 0.85rem;
+            color: #64748b;
         }
 
-        /* Avatar Container */
+        .main-container {
+            display: flex;
+            gap: 30px;
+            max-width: 900px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Left Panel - Avatar */
+        .avatar-panel {
+            flex: 0 0 320px;
+        }
+
         .avatar-container {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 30px;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 20px;
             position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(56, 189, 248, 0.2);
+            border: 3px solid #334155;
         }
 
-        .avatar {
+        .avatar-video {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #4fc3f7, #0288d1);
+            object-fit: cover;
+            object-position: center top;
+            display: none;
+        }
+
+        .avatar-video.active {
+            display: block;
+        }
+
+        .avatar-container.talking {
+            border-color: #38bdf8;
+            box-shadow: 0 10px 60px rgba(56, 189, 248, 0.4);
+        }
+
+        .status-badge {
+            text-align: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: #1e293b;
+            border: 1px solid #334155;
+            margin-bottom: 15px;
+        }
+
+        .status-badge.listening {
+            background: rgba(249, 115, 22, 0.2);
+            border-color: #f97316;
+            color: #fb923c;
+        }
+
+        .status-badge.speaking {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+
+        .status-badge.thinking {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: #a855f7;
+            color: #c084fc;
+        }
+
+        /* Right Panel - Chat */
+        .chat-panel {
+            flex: 1;
+            min-width: 300px;
+            max-width: 450px;
+        }
+
+        .chat-container {
+            background: #1e293b;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #334155;
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-badge {
+            font-size: 0.7rem;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            padding: 3px 8px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .message.ai {
+            background: #334155;
+            color: #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            background: #0ea5e9;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.typing {
+            background: #334155;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .chat-input-area {
+            padding: 12px;
+            border-top: 1px solid #334155;
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 20px;
+            background: #0f172a;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .chat-input::placeholder {
+            color: #475569;
+        }
+
+        .chat-input:focus {
+            outline: 2px solid #38bdf8;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-mic {
+            background: #334155;
+            color: #94a3b8;
+            width: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            box-shadow: 0 10px 40px rgba(79, 195, 247, 0.3);
-            overflow: hidden;
         }
 
-        /* Face */
-        .face {
-            position: relative;
-            width: 120px;
-            height: 120px;
+        .btn-mic.recording {
+            background: #dc2626;
+            color: white;
+            animation: pulse-red 1s infinite;
         }
 
-        /* Eyes */
-        .eyes {
-            display: flex;
-            justify-content: space-between;
-            width: 80px;
-            margin: 0 auto;
-            padding-top: 20px;
-        }
+        @keyframes pulse-red {
 
-        .eye {
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            position: relative;
-        }
-
-        .eye::after {
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #1a1a2e;
-            border-radius: 50%;
-            top: 5px;
-            left: 5px;
-        }
-
-        /* Mouth - Idle State */
-        .mouth {
-            width: 40px;
-            height: 8px;
-            background: #1a1a2e;
-            border-radius: 10px;
-            margin: 30px auto 0;
-            transition: all 0.1s ease;
-        }
-
-        /* Mouth - Talking State */
-        .avatar.talking .mouth {
-            animation: talk 0.15s infinite alternate;
-        }
-
-        @keyframes talk {
-            0% {
-                height: 8px;
-                width: 40px;
-                border-radius: 10px;
-            }
-            50% {
-                height: 25px;
-                width: 35px;
-                border-radius: 50%;
-            }
+            0%,
             100% {
-                height: 15px;
-                width: 30px;
-                border-radius: 50%;
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
             }
         }
 
-        /* Pulse effect when talking */
-        .avatar.talking {
-            animation: pulse 0.5s infinite alternate;
-        }
-
-        @keyframes pulse {
-            from {
-                box-shadow: 0 10px 40px rgba(79, 195, 247, 0.3);
-            }
-            to {
-                box-shadow: 0 10px 60px rgba(79, 195, 247, 0.6);
-            }
-        }
-
-        /* Status indicator */
-        .status {
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.1);
-        }
-
-        .status.idle {
-            color: #888;
-        }
-
-        .status.talking {
-            color: #4fc3f7;
-            background: rgba(79, 195, 247, 0.2);
-        }
-
-        /* Input area */
-        .input-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            font-size: 1rem;
-            resize: none;
-            height: 80px;
-        }
-
-        textarea::placeholder {
-            color: #666;
-        }
-
-        textarea:focus {
-            outline: 2px solid #4fc3f7;
-        }
-
-        button {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #4fc3f7, #0288d1);
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(79, 195, 247, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
+        .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
-        /* Quick responses */
-        .quick-responses {
-            margin-top: 20px;
+        /* Quick Actions */
+        .quick-actions {
+            margin-top: 15px;
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            justify-content: center;
         }
 
         .quick-btn {
-            padding: 8px 12px;
+            padding: 8px 14px;
             font-size: 0.8rem;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .quick-btn:hover {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
+            background: #334155;
+            border-color: #38bdf8;
+            color: #38bdf8;
         }
 
-        .note {
+        .footer {
             margin-top: 30px;
             font-size: 0.75rem;
-            color: #666;
+            color: #475569;
+            text-align: center;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>MedAssist AI Avatar</h1>
-        <p class="subtitle">Fake Lip Sync POC</p>
 
-        <div class="avatar-container">
-            <div class="avatar" id="avatar">
-                <div class="face">
-                    <div class="eyes">
-                        <div class="eye"></div>
-                        <div class="eye"></div>
-                    </div>
-                    <div class="mouth"></div>
-                </div>
+<body>
+    <div class="header">
+        <h1>🏥 MedAssist AI</h1>
+        <p class="subtitle">Your Virtual Health Assistant</p>
+    </div>
+
+    <div class="main-container">
+        <!-- Avatar Panel -->
+        <div class="avatar-panel">
+            <div class="avatar-container" id="avatarContainer">
+                <video id="silentVideo" class="avatar-video active" src="realistic doctor silent.mp4" loop muted
+                    autoplay playsinline></video>
+                <video id="talkingVideo" class="avatar-video" src="realistic doctor talking.mp4" loop muted
+                    playsinline></video>
+            </div>
+            <div class="status-badge" id="status">👋 Ready to help</div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="quickAsk('I have a headache and mild fever')">🤕 Headache</button>
+                <button class="quick-btn" onclick="quickAsk('I feel nauseous since morning')">🤢 Nausea</button>
+                <button class="quick-btn" onclick="quickAsk('I have chest pain')">💔 Chest Pain</button>
+                <button class="quick-btn" onclick="quickAsk('I need a doctor appointment')">👨‍⚕️ Find Doctor</button>
             </div>
         </div>
 
-        <div class="status idle" id="status">Idle - Ready to speak</div>
-
-        <div class="input-area">
-            <textarea 
-                id="textInput" 
-                placeholder="Type what the AI should say..."
-            >Hello! I'm your virtual health assistant. How can I help you today?</textarea>
-            <button id="speakBtn" onclick="speak()">🎤 Speak</button>
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <span>💬 Conversation</span>
+                    <span class="ai-badge">Gemini 3 Flash</span>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="chat-input-area">
+                    <button class="btn btn-mic" id="micBtn" onclick="toggleVoiceInput()">🎤</button>
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Describe your symptoms..."
+                        onkeypress="handleKeyPress(event)">
+                    <button class="btn btn-primary" id="sendBtn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="quick-responses">
-            <button class="quick-btn" onclick="quickSpeak('Hello! How are you feeling today?')">Greeting</button>
-            <button class="quick-btn" onclick="quickSpeak('I understand. Can you tell me more about your symptoms?')">Ask Symptoms</button>
-            <button class="quick-btn" onclick="quickSpeak('Based on what you described, I recommend seeing a general physician.')">Recommend</button>
-        </div>
-
-        <p class="note">Uses browser's built-in Text-to-Speech. Avatar animates while audio plays.</p>
+    <div class="footer">
+        MedAssist AI POC • Powered by Google Gemini • For demonstration purposes only
     </div>
 
     <script>
-        const avatar = document.getElementById('avatar');
-        const status = document.getElementById('status');
-        const textInput = document.getElementById('textInput');
-        const speakBtn = document.getElementById('speakBtn');
+        // ===== CONFIGURATION =====
+        const GEMINI_API_KEY = 'AIzaSyBMppHj1hUH5-doxokqINIP0OpjSNFuBEE';
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
-        // Check for speech synthesis support
-        if (!('speechSynthesis' in window)) {
-            alert('Sorry, your browser does not support Text-to-Speech.');
+        // System prompt for the AI
+        const SYSTEM_PROMPT = `You are Dr. Ryan, an experienced virtual health assistant. You MUST actively help patients by:
+
+1. **ALWAYS ASK FOLLOW-UP QUESTIONS** - When a patient describes symptoms, ask 2-3 specific questions like:
+   - "How long have you been experiencing this?"
+   - "On a scale of 1-10, how severe is it?"
+   - "Have you noticed any other symptoms like fever, dizziness, or loss of appetite?"
+
+2. **PROVIDE POSSIBLE CAUSES** - After gathering info, suggest 2-3 possible conditions. Example:
+   "Based on your symptoms (nausea + headache for 2 days), this could be:
+   - Viral gastroenteritis (stomach bug)
+   - Migraine with nausea
+   - Food poisoning
+   Let me ask a few more questions to narrow it down."
+
+3. **RECOMMEND ACTIONS** - Tell patients what to do:
+   - Home remedies they can try
+   - When they should see a doctor
+   - Which type of specialist to visit
+
+4. **TRIAGE URGENCY**:
+   - EMERGENCY (call 911): chest pain, difficulty breathing, stroke signs
+   - URGENT (see doctor today): high fever, severe pain, blood in stool
+   - ROUTINE: can schedule appointment in next few days
+
+RULES:
+- Be conversational and warm, but informative
+- Each response should advance the diagnosis - don't just acknowledge, INVESTIGATE
+- Ask ONE focused question at a time to keep conversation flowing
+- Provide actionable advice, not just sympathy`;
+
+        // Conversation history for context
+        let conversationHistory = [];
+
+        // ===== ELEMENTS =====
+        const avatarContainer = document.getElementById('avatarContainer');
+        const silentVideo = document.getElementById('silentVideo');
+        const talkingVideo = document.getElementById('talkingVideo');
+        const status = document.getElementById('status');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const micBtn = document.getElementById('micBtn');
+
+        let isRecording = false;
+        let recognition = null;
+
+        // Ensure silent video plays
+        silentVideo.play().catch(e => console.log('Autoplay blocked'));
+
+        // ===== GEMINI API =====
+        async function callGeminiAPI(userMessage) {
+            // Add user message to history
+            conversationHistory.push({
+                role: 'user',
+                parts: [{ text: userMessage }]
+            });
+
+            // Build the request
+            const requestBody = {
+                contents: [
+                    {
+                        role: 'user',
+                        parts: [{ text: SYSTEM_PROMPT }]
+                    },
+                    {
+                        role: 'model',
+                        parts: [{ text: "Hello! I'm Dr. Maya, your virtual health assistant. How can I help you today?" }]
+                    },
+                    ...conversationHistory
+                ],
+                generationConfig: {
+                    temperature: 0.8,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 500,
+                }
+            };
+
+            try {
+                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const aiResponse = data.candidates[0].content.parts[0].text;
+
+                // Add AI response to history
+                conversationHistory.push({
+                    role: 'model',
+                    parts: [{ text: aiResponse }]
+                });
+
+                return aiResponse;
+            } catch (error) {
+                console.error('Gemini API Error:', error);
+                return "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.";
+            }
         }
 
-        function speak() {
-            const text = textInput.value.trim();
-            if (!text) return;
+        // ===== VIDEO CONTROL =====
+        function showTalkingVideo() {
+            silentVideo.classList.remove('active');
+            silentVideo.pause();
+            talkingVideo.classList.add('active');
+            talkingVideo.currentTime = 0;
+            talkingVideo.play();
+            avatarContainer.classList.add('talking');
+        }
 
-            // Cancel any ongoing speech
+        function showSilentVideo() {
+            talkingVideo.classList.remove('active');
+            talkingVideo.pause();
+            silentVideo.classList.add('active');
+            silentVideo.play();
+            avatarContainer.classList.remove('talking');
+        }
+
+        // ===== CHAT FUNCTIONS =====
+        function addMessage(text, isUser = false, isTyping = false) {
+            const msg = document.createElement('div');
+            msg.className = `message ${isUser ? 'user' : 'ai'}${isTyping ? ' typing' : ''}`;
+            msg.textContent = text;
+            if (isTyping) msg.id = 'typingIndicator';
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return msg;
+        }
+
+        function removeTypingIndicator() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        function stripEmojis(text) {
+            // Remove emojis using regex
+            return text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{231A}-\u{231B}]|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|[\u{25AA}-\u{25AB}]|[\u{25B6}]|[\u{25C0}]|[\u{25FB}-\u{25FE}]|[\u{2614}-\u{2615}]|[\u{2648}-\u{2653}]|[\u{267F}]|[\u{2693}]|[\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|[\u{26CE}]|[\u{26D4}]|[\u{26EA}]|[\u{26F2}-\u{26F3}]|[\u{26F5}]|[\u{26FA}]|[\u{26FD}]|[\u{2702}]|[\u{2705}]|[\u{2708}-\u{270D}]|[\u{270F}]|[\u{2712}]|[\u{2714}]|[\u{2716}]|[\u{271D}]|[\u{2721}]|[\u{2728}]|[\u{2733}-\u{2734}]|[\u{2744}]|[\u{2747}]|[\u{274C}]|[\u{274E}]|[\u{2753}-\u{2755}]|[\u{2757}]|[\u{2763}-\u{2764}]|[\u{2795}-\u{2797}]|[\u{27A1}]|[\u{27B0}]|[\u{27BF}]|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|[\u{2B50}]|[\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]/gu, '').trim();
+        }
+
+        function speak(text) {
+            if (!('speechSynthesis' in window)) return;
+
+            // Remove emojis before speaking
+            const cleanText = stripEmojis(text);
+            if (!cleanText) return;
+
             window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            
-            // Configure voice
+            const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
-            utterance.volume = 1.0;
 
-            // Try to use a nice voice
             const voices = window.speechSynthesis.getVoices();
-            const preferredVoice = voices.find(v => 
-                v.name.includes('Google') || 
-                v.name.includes('Microsoft') ||
-                v.name.includes('Samantha')
+            const maleVoice = voices.find(v =>
+                v.name.includes('Microsoft David') ||
+                v.name.includes('Google UK English Male') ||
+                v.name.includes('Alex') ||
+                v.name.includes('Daniel')
             );
-            if (preferredVoice) {
-                utterance.voice = preferredVoice;
-            }
+            if (maleVoice) utterance.voice = maleVoice;
 
-            // Event: Start speaking
             utterance.onstart = () => {
-                avatar.classList.add('talking');
+                showTalkingVideo();
                 status.textContent = '🗣️ Speaking...';
-                status.className = 'status talking';
-                speakBtn.disabled = true;
+                status.className = 'status-badge speaking';
             };
 
-            // Event: Stop speaking
             utterance.onend = () => {
-                avatar.classList.remove('talking');
-                status.textContent = 'Idle - Ready to speak';
-                status.className = 'status idle';
-                speakBtn.disabled = false;
+                showSilentVideo();
+                status.textContent = '👋 Ready to help';
+                status.className = 'status-badge';
+                sendBtn.disabled = false;
             };
 
-            // Event: Error
-            utterance.onerror = () => {
-                avatar.classList.remove('talking');
-                status.textContent = 'Error - Try again';
-                status.className = 'status idle';
-                speakBtn.disabled = false;
-            };
-
-            // Speak!
             window.speechSynthesis.speak(utterance);
         }
 
-        function quickSpeak(text) {
-            textInput.value = text;
-            speak();
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Disable input while processing
+            sendBtn.disabled = true;
+            chatInput.disabled = true;
+
+            // Add user message
+            addMessage(text, true);
+            chatInput.value = '';
+
+            // Show thinking state
+            status.textContent = '🧠 Thinking...';
+            status.className = 'status-badge thinking';
+            addMessage('Thinking...', false, true);
+
+            // Call Gemini API
+            const response = await callGeminiAPI(text);
+
+            // Remove typing indicator and show response
+            removeTypingIndicator();
+            addMessage(response);
+
+            // Speak the response
+            chatInput.disabled = false;
+            speak(response);
         }
 
-        // Load voices (some browsers need this)
-        window.speechSynthesis.onvoiceschanged = () => {
-            window.speechSynthesis.getVoices();
-        };
+        function quickAsk(text) {
+            chatInput.value = text;
+            sendMessage();
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
+        }
+
+        // ===== VOICE INPUT =====
+        function toggleVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Voice input not supported in this browser. Try Chrome.');
+                return;
+            }
+
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        function startRecording() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                micBtn.classList.add('recording');
+                micBtn.textContent = '⏹️';
+                status.textContent = '🎙️ Listening...';
+                status.className = 'status-badge listening';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                chatInput.value = transcript;
+                sendMessage();
+            };
+
+            recognition.onend = () => stopRecording();
+            recognition.onerror = () => stopRecording();
+            recognition.start();
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            micBtn.classList.remove('recording');
+            micBtn.textContent = '🎤';
+            status.textContent = '👋 Ready to help';
+            status.className = 'status-badge';
+            if (recognition) recognition.stop();
+        }
+
+        // ===== INITIALIZATION =====
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+
+        // Initial greeting from AI
+        window.addEventListener('load', async () => {
+            const greeting = "Hello! I'm Dr. Ryan, your virtual health assistant. How can I help you today?";
+            addMessage(greeting);
+            setTimeout(() => speak(greeting), 500);
+        });
     </script>
 </body>
+
 </html>
