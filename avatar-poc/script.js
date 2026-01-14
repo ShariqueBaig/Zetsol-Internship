@@ -88,10 +88,60 @@ const app = {
 };
 
 
-// ===== CONFIGURATION (EXISTING) =====
-const GEMINI_API_KEY = 'AIzaSyBiDDhoZyjtdAUNWwkVjwNjV-xfhNe_zS0';
-// Updated to Gemini 2.5 Flash (Stable, Active since June 2025)
+// ===== CONFIGURATION =====
+// API Key is stored in localStorage for security (not hardcoded)
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+// Helper to get API key from localStorage
+function getApiKey() {
+    return localStorage.getItem('medassist_gemini_api_key') || '';
+}
+
+// Helper to save API key
+function saveApiKey(key) {
+    localStorage.setItem('medassist_gemini_api_key', key);
+}
+
+// Check if API key exists, if not show setup modal
+function checkApiKeySetup() {
+    if (!getApiKey()) {
+        showApiKeyModal();
+        return false;
+    }
+    return true;
+}
+
+// Show API key setup modal
+function showApiKeyModal() {
+    const modal = document.getElementById('apiKeyModal');
+    if (modal) modal.classList.add('active');
+}
+
+// Hide API key modal and save
+function saveApiKeyAndClose() {
+    const input = document.getElementById('apiKeyInput');
+    const key = input.value.trim();
+
+    if (!key) {
+        alert('Please enter a valid API key');
+        return;
+    }
+
+    if (!key.startsWith('AIza')) {
+        alert('Invalid API key format. Gemini API keys start with "AIza"');
+        return;
+    }
+
+    saveApiKey(key);
+    document.getElementById('apiKeyModal').classList.remove('active');
+
+    // Update badge to show configured
+    const badge = document.querySelector('.ai-badge');
+    if (badge) {
+        badge.textContent = 'API Configured';
+        badge.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+    }
+}
 
 // System prompt for the AI
 const SYSTEM_PROMPT = `You are Dr. Ryan, a virtual triage assistant. Your ONLY job is to:
@@ -167,7 +217,7 @@ async function callGeminiAPI(userMessage) {
     };
 
     try {
-        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        const response = await fetch(`${GEMINI_API_URL}?key=${getApiKey()}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -197,13 +247,35 @@ async function callGeminiAPI(userMessage) {
             badge.title = 'Connected to Live API';
         }
 
+        // === SPECIALTY DETECTION ===
+        // Scan the ENTIRE conversation history for specialty mentions (not just the last message)
+        // This fixes the bug where specialty was mentioned earlier but not in the trigger message
+        const allConversationText = conversationHistory
+            .filter(msg => msg.role === 'model')
+            .map(msg => msg.parts[0].text)
+            .join(' ');
+
+        // Check for specialties in order of specificity (most specific first)
+        const specialtyKeywords = [
+            { keywords: ['Dermatologist', 'dermatologist', 'skin specialist', 'skin doctor'], specialty: 'Dermatologist' },
+            { keywords: ['Cardiologist', 'cardiologist', 'heart specialist', 'heart doctor'], specialty: 'Cardiologist' },
+            { keywords: ['Neurologist', 'neurologist', 'brain specialist'], specialty: 'Neurologist' },
+            { keywords: ['Pediatrician', 'pediatrician', 'child specialist'], specialty: 'Pediatrician' },
+            { keywords: ['General Physician', 'general physician', 'GP', 'general doctor'], specialty: 'General Physician' }
+        ];
+
+        for (const { keywords, specialty } of specialtyKeywords) {
+            if (keywords.some(kw => allConversationText.includes(kw))) {
+                currentRecommendedSpecialty = specialty;
+                console.log(`[Specialty Detected] ${specialty} from conversation history`);
+                break; // Stop at first match (most specific)
+            }
+        }
+
         // === INTENT DETECTION ===
         // If AI says the trigger phrase, open the modal!
         if (aiResponse.includes("Showing available doctors now") || aiResponse.includes("Showing available doctors")) {
-            // Extract specialty if possible (simple heuristic)
-            if (aiResponse.includes("Dermatologist")) currentRecommendedSpecialty = 'Dermatologist';
-            if (aiResponse.includes("Cardiologist")) currentRecommendedSpecialty = 'Cardiologist';
-            if (aiResponse.includes("General Physician")) currentRecommendedSpecialty = 'General Physician';
+            console.log(`[Booking Trigger] Opening modal with specialty: ${currentRecommendedSpecialty}`);
 
             // Wait for speech to start then open modal
             setTimeout(() => {
@@ -555,4 +627,24 @@ function confirmBooking() {
 
 // Expose functions globally
 window.openBookingModal = openBookingModal;
-window.app = app; // Expose app controller
+window.app = app;
+window.getApiKey = getApiKey;
+window.saveApiKey = saveApiKey;
+window.showApiKeyModal = showApiKeyModal;
+window.saveApiKeyAndClose = saveApiKeyAndClose;
+window.checkApiKeySetup = checkApiKeySetup;
+
+// Check for API key on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Show API key modal if not configured
+    if (!getApiKey()) {
+        setTimeout(() => showApiKeyModal(), 500);
+    } else {
+        // Update badge to show configured
+        const badge = document.querySelector('.ai-badge');
+        if (badge) {
+            badge.textContent = 'API Ready';
+            badge.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+        }
+    }
+});

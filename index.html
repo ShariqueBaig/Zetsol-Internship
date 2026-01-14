@@ -27,6 +27,10 @@
                 </div>
             </div>
         </div>
+        <button class="btn-sm" style="margin-top: 20px; opacity: 0.7;" onclick="showApiKeyModal()">
+            ⚙️ API Settings
+        </button>
+    </div>
     </div>
 
     <!-- 2. PATIENT SCREEN (Original Avatar View) -->
@@ -195,10 +199,34 @@
         </div>
     </div>
 
+    <!-- API Key Setup Modal -->
+    <div class="modal-overlay" id="apiKeyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>🔑 API Key Setup</h2>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <p style="color: #94a3b8; margin-bottom: 15px;">
+                    Enter your Gemini API key to enable AI features.
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #38bdf8;">Get one
+                        free here →</a>
+                </p>
+                <input type="password" id="apiKeyInput" class="form-input" placeholder="AIza..."
+                    style="width: 100%; margin-bottom: 15px; font-family: monospace;">
+                <button class="btn btn-primary" style="width: 100%;" onclick="saveApiKeyAndClose()">
+                    Save API Key
+                </button>
+                <p style="color: #64748b; font-size: 0.8rem; margin-top: 15px; text-align: center;">
+                    🔒 Key is stored locally in your browser only
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="avatar-poc/storage.js"></script>
     <script src="avatar-poc/script.js"></script>
-    <script src="avatar-poc/doctor.js"></script> <!-- New file for doctor logic -->
+    <script src="avatar-poc/doctor.js"></script>
 </body>
 
 </html>

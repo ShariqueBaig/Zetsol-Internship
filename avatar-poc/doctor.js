@@ -100,10 +100,8 @@ const doctorApp = {
             // Call Gemini (Reuse the global function or simplified fetch)
             // We use the global constant from script.js context (assumed available or accessed via window)
             // Ideally we should refactor API call to a shared service, but for now we access global vars.
-            // WARNING: script.js variables like GEMINI_API_KEY might not be directly scope-visible across files if modules aren't used.
-            // Since they are script tags, they ARE valid globals.
-
-            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            // Note: getApiKey() is defined in script.js and available globally
+            const response = await fetch(`${GEMINI_API_URL}?key=${getApiKey()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -111,7 +109,13 @@ const doctorApp = {
                 })
             });
             const data = await response.json();
-            const aiText = data.candidates[0].content.parts[0].text;
+            let aiText = data.candidates[0].content.parts[0].text;
+
+            // Clean up markdown code blocks that AI might return
+            aiText = aiText
+                .replace(/```html\n?/gi, '')  // Remove ```html
+                .replace(/```\n?/g, '')       // Remove closing ```
+                .trim();
 
             summaryBox.innerHTML = aiText;
 

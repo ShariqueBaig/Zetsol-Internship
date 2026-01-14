@@ -1,0 +1,17 @@
+{
+  "name": "medassist-server",
+  "version": "1.0.0",
+  "description": "MedAssist AI Backend Server",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "seed": "node server/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^9.4.3",
+    "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3"
+  }
+}
