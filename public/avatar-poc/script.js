@@ -95,7 +95,7 @@ const app = {
 
 // ===== CONFIGURATION =====
 // API Key is stored in localStorage for security (not hardcoded)
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
 // Helper to get API key from localStorage
 function getApiKey() {
@@ -728,7 +728,7 @@ async function initApp() {
         }
     }
 }
-}
 
 // Start app on load
 document.addEventListener('DOMContentLoaded', initApp);
+
