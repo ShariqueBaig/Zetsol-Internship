@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAssist AI - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e2e8f0;
+        }
+
+        .login-container {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .role-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .role-tab {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #334155;
+            background: transparent;
+            color: #94a3b8;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .role-tab:hover {
+            border-color: #475569;
+        }
+
+        .role-tab.active {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+
+        .form-input::placeholder {
+            color: #64748b;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #38bdf8, #6366f1);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .demo-accounts {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .demo-accounts h4 {
+            color: #64748b;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .demo-account {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .demo-account:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .demo-account .name {
+            font-size: 0.9rem;
+        }
+
+        .demo-account .email {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .demo-account .fill-btn {
+            font-size: 0.75rem;
+            color: #38bdf8;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>MedAssist AI</h1>
+            <p>Your Virtual Health Assistant</p>
+        </div>
+
+        <div class="role-tabs">
+            <button class="role-tab active" onclick="switchRole('patient')">👤 Patient</button>
+            <button class="role-tab" onclick="switchRole('doctor')">🩺 Doctor</button>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                Sign In
+            </button>
+        </form>
+
+        <div class="demo-accounts">
+            <h4>Demo Accounts (click to fill)</h4>
+            <div id="demoAccountsList"></div>
+        </div>
+
+        <p class="footer-note">
+            🔒 MedAssist AI POC • For demonstration only
+        </p>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentRole = 'patient';
+
+        const demoAccounts = {
+            patient: [
+                { name: 'John Doe', email: 'john.doe@email.com' },
+                { name: 'Jane Smith', email: 'jane.smith@email.com' },
+                { name: 'Alex Kumar', email: 'alex.kumar@email.com' },
+                { name: 'Maria Garcia', email: 'maria.garcia@email.com' },
+                { name: 'David Wilson', email: 'david.wilson@email.com' }
+            ],
+            doctor: [
+                { name: 'Dr. Sarah Chen', email: 'sarah.chen@medassist.com' },
+                { name: 'Dr. Michael Ross', email: 'michael.ross@medassist.com' },
+                { name: 'Dr. Emily Watson', email: 'emily.watson@medassist.com' },
+                { name: 'Dr. James Lee', email: 'james.lee@medassist.com' },
+                { name: 'Dr. Linda Martinez', email: 'linda.martinez@medassist.com' },
+                { name: 'Dr. Robert Patel', email: 'robert.patel@medassist.com' }
+            ]
+        };
+
+        function switchRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            renderDemoAccounts();
+            hideError();
+        }
+
+        function renderDemoAccounts() {
+            const list = document.getElementById('demoAccountsList');
+            const accounts = demoAccounts[currentRole];
+
+            list.innerHTML = accounts.map(acc => `
+                <div class="demo-account" onclick="fillCredentials('${acc.email}')">
+                    <div>
+                        <div class="name">${acc.name}</div>
+                        <div class="email">${acc.email}</div>
+                    </div>
+                    <span class="fill-btn">Fill →</span>
+                </div>
+            `).join('');
+        }
+
+        function fillCredentials(email) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = currentRole === 'patient' ? 'patient123' : 'doctor123';
+            hideError();
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+            hideError();
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/${currentRole}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Login failed');
+                }
+
+                // Store user session
+                localStorage.setItem('medassist_user', JSON.stringify(data.user));
+                localStorage.setItem('medassist_role', data.role);
+
+                // Redirect to main app
+                window.location.href = '/app.html';
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('medassist_user')) {
+            window.location.href = '/app.html';
+        }
+
+        // Initial render
+        renderDemoAccounts();
+    </script>
+</body>
+
+</html>

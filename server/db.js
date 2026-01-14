@@ -1,20 +1,32 @@
 /**
- * db.js - SQLite Database Connection and Schema
+ * db.js - SQLite Database Connection using sql.js (pure JavaScript)
  */
 
-const Database = require('better-sqlite3');
+const initSqlJs = require('sql.js');
+const fs = require('fs');
 const path = require('path');
 
-// Create database in data folder
+// Database file path
 const dbPath = path.join(__dirname, '..', 'data', 'medassist.db');
-const db = new Database(dbPath);
 
-// Enable foreign keys
-db.pragma('foreign_keys = ON');
+let db = null;
 
-// Create tables
-function initializeSchema() {
-    db.exec(`
+// Initialize database
+async function initDatabase() {
+    const SQL = await initSqlJs();
+
+    // Load existing database or create new one
+    if (fs.existsSync(dbPath)) {
+        const buffer = fs.readFileSync(dbPath);
+        db = new SQL.Database(buffer);
+        console.log('Loaded existing database');
+    } else {
+        db = new SQL.Database();
+        console.log('Created new database');
+    }
+
+    // Create tables
+    db.run(`
         -- Patients
         CREATE TABLE IF NOT EXISTS patients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,10 +83,69 @@ function initializeSchema() {
             FOREIGN KEY (appointment_id) REFERENCES appointments(id)
         );
     `);
+
+    saveDatabase();
     console.log('Database schema initialized');
+
+    return db;
 }
 
-// Initialize on load
-initializeSchema();
+// Save database to file
+function saveDatabase() {
+    if (db) {
+        const data = db.export();
+        const buffer = Buffer.from(data);
+        fs.writeFileSync(dbPath, buffer);
+    }
+}
 
-module.exports = db;
+// Get database instance
+function getDb() {
+    return db;
+}
+
+// Query helpers
+function run(sql, params = []) {
+    db.run(sql, params);
+    saveDatabase();
+}
+
+function get(sql, params = []) {
+    const stmt = db.prepare(sql);
+    stmt.bind(params);
+    if (stmt.step()) {
+        const result = stmt.getAsObject();
+        stmt.free();
+        return result;
+    }
+    stmt.free();
+    return null;
+}
+
+function all(sql, params = []) {
+    const stmt = db.prepare(sql);
+    stmt.bind(params);
+    const results = [];
+    while (stmt.step()) {
+        results.push(stmt.getAsObject());
+    }
+    stmt.free();
+    return results;
+}
+
+function insert(sql, params = []) {
+    db.run(sql, params);
+    const lastId = db.exec("SELECT last_insert_rowid()")[0].values[0][0];
+    saveDatabase();
+    return lastId;
+}
+
+module.exports = {
+    initDatabase,
+    getDb,
+    run,
+    get,
+    all,
+    insert,
+    saveDatabase
+};
