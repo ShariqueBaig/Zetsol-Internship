@@ -125,6 +125,45 @@ app.get('/api/doctors/:id/appointments', (req, res) => {
     res.json(appointments);
 });
 
+// Get available time slots for a doctor on a specific date
+app.get('/api/doctors/:id/slots', (req, res) => {
+    const doctorId = parseInt(req.params.id);
+    const date = req.query.date; // Expected format: YYYY-MM-DD
+
+    if (!date) {
+        return res.status(400).json({ error: 'Date parameter is required' });
+    }
+
+    // Generate all 30-minute slots from 9AM to 5PM
+    const allSlots = [];
+    for (let hour = 9; hour < 17; hour++) {
+        allSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+        allSlots.push(`${hour.toString().padStart(2, '0')}:30`);
+    }
+
+    // Get booked appointments for this doctor on this date
+    const bookedAppointments = all(`
+        SELECT appointment_time FROM appointments 
+        WHERE doctor_id = ? 
+        AND date(appointment_time) = date(?)
+        AND status = 'upcoming'
+    `, [doctorId, date]);
+
+    // Extract booked times (HH:MM format)
+    const bookedTimes = bookedAppointments.map(a => {
+        const time = new Date(a.appointment_time);
+        return `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}`;
+    });
+
+    // Return slots with availability status
+    const slots = allSlots.map(time => ({
+        time,
+        available: !bookedTimes.includes(time)
+    }));
+
+    res.json(slots);
+});
+
 // ===== APPOINTMENT ROUTES =====
 
 // Create new appointment

@@ -531,11 +531,16 @@ window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(
 // Updated to use StorageService.getDoctors()
 
 let selectedDoctor = null;
+let selectedDate = null;
+let selectedSlot = null;
 let currentSpecialty = 'General Physician';
 
 function openBookingModal(specialty = 'General Physician') {
     currentSpecialty = specialty;
     selectedDoctor = null;
+    selectedDate = new Date().toISOString().split('T')[0]; // Today
+    selectedSlot = null;
+
     const modal = document.getElementById('bookingModal');
     const modalBody = document.getElementById('modalBody');
 
@@ -547,29 +552,37 @@ function openBookingModal(specialty = 'General Physician') {
     const otherDocs = allDoctors.filter(d => d.specialty !== specialty);
     const sortedDoctors = [...recommendedDocs, ...otherDocs];
 
-    let html = `<p style="color: #94a3b8; margin-bottom: 15px;">All available doctors (${specialty} recommended):</p>`;
+    let html = `
+        <p style="color: #94a3b8; margin-bottom: 15px;">Step 1: Select a doctor (${specialty} recommended)</p>
+        <div class="doctors-list">
+    `;
 
     sortedDoctors.forEach((doc, index) => {
-        // Generate Initials
         const initials = doc.name.split(' ').map(n => n[0]).join('').substring(0, 2);
         const isRecommended = doc.specialty === specialty;
 
         html += `
-            <div class="doctor-card ${isRecommended ? 'recommended' : ''}" id="doctor-${index}" onclick="selectDoctor(${index}, ${doc.id}, '${doc.name}', '${doc.specialty}', 'Today 3:00 PM')">
+            <div class="doctor-card ${isRecommended ? 'recommended' : ''}" id="doctor-${index}" onclick="selectDoctor(${index}, ${doc.id}, '${doc.name}', '${doc.specialty}')">
                 <div class="doctor-avatar">${initials}</div>
                 <div class="doctor-info">
                     <div class="doctor-name">${doc.name} ${isRecommended ? '<span style="color:#22c55e; font-size:0.8rem;">★ Recommended</span>' : ''}</div>
                     <div class="doctor-specialty">${doc.specialty} • ${doc.experience}</div>
                     <div class="doctor-meta">
                         <span class="doctor-rating">★ ${doc.rating}</span>
-                        <span class="doctor-available">Today 3:00 PM</span>
                     </div>
                 </div>
             </div>
         `;
     });
 
-    html += `<button class="book-btn" id="bookBtn" onclick="confirmBooking()" disabled>Select a doctor to book</button>`;
+    html += `</div>
+        <div id="slotSection" style="display: none;">
+            <p style="color: #94a3b8; margin: 20px 0 10px;">Step 2: Select date & time</p>
+            <input type="date" id="appointmentDate" class="form-input" style="margin-bottom: 15px;" onchange="loadTimeSlots()">
+            <div id="timeSlots" class="time-slots-grid"></div>
+        </div>
+        <button class="book-btn" id="bookBtn" onclick="confirmBooking()" disabled>Select a doctor and time slot</button>
+    `;
 
     modalBody.innerHTML = html;
     modal.classList.add('active');
@@ -579,28 +592,104 @@ function closeBookingModal() {
     document.getElementById('bookingModal').classList.remove('active');
 }
 
-function selectDoctor(index, doctorId, name, specialty, time) {
-    console.log('selectDoctor called with:', { index, doctorId, name, specialty, time });
+async function selectDoctor(index, doctorId, name, specialty) {
+    console.log('selectDoctor called with:', { index, doctorId, name, specialty });
 
     // Remove previous selection
     document.querySelectorAll('.doctor-card').forEach(card => card.classList.remove('selected'));
 
-    // Select new doctor (including ID and specialty for proper tracking)
+    // Select new doctor
     document.getElementById(`doctor-${index}`).classList.add('selected');
-    selectedDoctor = { id: doctorId, name, specialty, time };
+    selectedDoctor = { id: doctorId, name, specialty };
+    selectedSlot = null;
+
+    // Show slot section
+    const slotSection = document.getElementById('slotSection');
+    slotSection.style.display = 'block';
+
+    // Set date picker to today
+    const dateInput = document.getElementById('appointmentDate');
+    dateInput.value = selectedDate;
+    dateInput.min = new Date().toISOString().split('T')[0]; // Can't book in past
+
+    // Load available slots
+    await loadTimeSlots();
+
+    // Update button
+    const bookBtn = document.getElementById('bookBtn');
+    bookBtn.disabled = true;
+    bookBtn.textContent = 'Select a time slot';
+}
+
+async function loadTimeSlots() {
+    if (!selectedDoctor) return;
+
+    const dateInput = document.getElementById('appointmentDate');
+    selectedDate = dateInput.value;
+    selectedSlot = null;
+
+    const slotsContainer = document.getElementById('timeSlots');
+    slotsContainer.innerHTML = '<p style="color:#94a3b8;">Loading slots...</p>';
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/doctors/${selectedDoctor.id}/slots?date=${selectedDate}`);
+        const slots = await response.json();
+
+        let html = '';
+        slots.forEach(slot => {
+            const formattedTime = formatTime(slot.time);
+            html += `
+                <div class="time-slot ${slot.available ? '' : 'booked'}" 
+                     onclick="${slot.available ? `selectTimeSlot('${slot.time}', this)` : ''}"
+                     ${!slot.available ? 'title="Already booked"' : ''}>
+                    ${formattedTime}
+                </div>
+            `;
+        });
+
+        slotsContainer.innerHTML = html || '<p style="color:#94a3b8;">No slots available</p>';
+
+        // Update button state
+        const bookBtn = document.getElementById('bookBtn');
+        bookBtn.disabled = true;
+        bookBtn.textContent = 'Select a time slot';
+    } catch (error) {
+        console.error('Failed to load slots:', error);
+        slotsContainer.innerHTML = '<p style="color:#ef4444;">Failed to load slots</p>';
+    }
+}
+
+function formatTime(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+}
+
+function selectTimeSlot(time, element) {
+    // Remove previous selection
+    document.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('selected'));
+
+    // Select new slot
+    element.classList.add('selected');
+    selectedSlot = time;
 
     // Enable book button
     const bookBtn = document.getElementById('bookBtn');
     bookBtn.disabled = false;
-    bookBtn.textContent = `Book with ${name} `;
+    bookBtn.textContent = `Book ${formatTime(time)} with ${selectedDoctor.name}`;
 }
 
 async function confirmBooking() {
-    if (!selectedDoctor) return;
+    if (!selectedDoctor || !selectedSlot) return;
 
     // Get logged-in user
     const user = getCurrentUser();
     const patientName = user ? user.full_name : 'Guest';
+
+    // Build full datetime
+    const appointmentDateTime = `${selectedDate}T${selectedSlot}:00`;
 
     // Capture current chat history text for the doctor
     const chatSummary = conversationHistory
@@ -614,7 +703,7 @@ async function confirmBooking() {
             specialty: selectedDoctor.specialty,
             doctorName: selectedDoctor.name,
             doctorId: selectedDoctor.id,
-            time: new Date().toISOString(),
+            time: appointmentDateTime,
             chatHistory: chatSummary
         });
 
@@ -623,17 +712,19 @@ async function confirmBooking() {
             return;
         }
 
+        const displayTime = `${selectedDate} at ${formatTime(selectedSlot)}`;
+
         const modal = document.getElementById('bookingModal');
         const modalBody = document.getElementById('modalBody');
         modalBody.innerHTML = `
         <div class="booking-success">
-                <div class="success-icon">OK</div>
+                <div class="success-icon">✓</div>
                 <div class="success-text">Appointment Booked!</div>
                 <p style="color: #94a3b8;">Your appointment has been confirmed.</p>
                 <div class="booking-details">
                     <p><strong>Doctor:</strong> ${selectedDoctor.name}</p>
                     <p><strong>Specialty:</strong> ${selectedDoctor.specialty}</p>
-                    <p><strong>Time:</strong> ${selectedDoctor.time}</p>
+                    <p><strong>Date & Time:</strong> ${displayTime}</p>
                     <p><strong>Confirmation #:</strong> MED-${Math.random().toString(36).substr(2, 8).toUpperCase()}</p>
                 </div>
                 <button class="book-btn" onclick="closeBookingModal()" style="margin-top: 20px;">Done</button>
@@ -641,7 +732,7 @@ async function confirmBooking() {
         `;
 
         // Add confirmation to chat
-        addMessage(`Great! I've booked your appointment with ${selectedDoctor.name} for ${selectedDoctor.time}. You'll receive a confirmation shortly.`);
+        addMessage(`Great! I've booked your appointment with ${selectedDoctor.name} for ${displayTime}. You'll receive a confirmation shortly.`);
     } catch (error) {
         console.error('Booking failed:', error);
         alert('An error occurred while booking. Please try again.');
