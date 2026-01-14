@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  medassist:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persist SQLite database
+      - medassist_data:/app/data
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+volumes:
+  medassist_data:
