@@ -22,6 +22,12 @@ async function seedDatabase() {
     run('DELETE FROM patients');
     run('DELETE FROM doctors');
 
+    // Reset auto-increment counters
+    run("DELETE FROM sqlite_sequence WHERE name='prescriptions'");
+    run("DELETE FROM sqlite_sequence WHERE name='appointments'");
+    run("DELETE FROM sqlite_sequence WHERE name='patients'");
+    run("DELETE FROM sqlite_sequence WHERE name='doctors'");
+
     // ===== SEED DOCTORS =====
     const doctors = [
         ['sarah.chen@medassist.com', hashPassword('doctor123'), 'Dr. Sarah Chen', 'General Physician', 4.8, '12 years', 'doctor1.png'],
