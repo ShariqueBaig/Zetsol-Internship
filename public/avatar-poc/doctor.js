@@ -82,6 +82,14 @@ const doctorApp = {
         document.getElementById('currentPatientName').textContent = this.currentAppointment.patientName || 'Walk-in Patient';
         document.getElementById('visitReason').textContent = this.currentAppointment.specialty || 'General Consultation';
 
+        // Display Patient Medical History from database
+        const historyBox = document.getElementById('medicalHistory');
+        if (this.currentAppointment.medicalHistory && this.currentAppointment.medicalHistory.trim()) {
+            historyBox.innerHTML = `<p style="color: #e2e8f0; white-space: pre-line;">${this.currentAppointment.medicalHistory}</p>`;
+        } else {
+            historyBox.innerHTML = '<span class="placeholder" style="color: #64748b;">No prior medical records for this patient.</span>';
+        }
+
         // Use REAL Chat History if available
         if (this.currentAppointment.chatHistory) {
             this.generateRealSummary(this.currentAppointment.chatHistory);
@@ -96,11 +104,15 @@ const doctorApp = {
         const transcriptionBox = document.getElementById('liveTranscription');
 
         summaryBox.innerHTML = '<span class="typing-text">Generating AI Summary from patient chat...</span>';
+        hintsBox.innerHTML = '<span class="typing-text" style="color: #fbbf24;">Analyzing for diagnosis hints...</span>';
 
         // Show raw chat log immediately
         transcriptionBox.innerHTML = chatLog.replace(/\n/g, '<br>');
 
-        // Construct Prompts
+        // Get medical history for context
+        const medicalHistory = this.currentAppointment.medicalHistory || 'No prior medical history available.';
+
+        // Construct Summary Prompt
         const summaryPrompt = `
         You are a medical assistant helper. Summarize the following patient chat logs for a doctor.
         Format accurately as HTML.
@@ -113,35 +125,91 @@ const doctorApp = {
         ${chatLog}
         `;
 
-        try {
-            const response = await fetch(`${GEMINI_API_URL}?key=${getApiKey()}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: summaryPrompt }] }]
-                })
-            });
-            const data = await response.json();
-            let aiText = data.candidates[0].content.parts[0].text;
+        // Construct Diagnosis Hints Prompt - considers full context
+        const diagnosisPrompt = `
+        You are an AI clinical decision support assistant. Based on the following patient information, provide 3-5 diagnostic hints or considerations for the doctor.
 
-            // Clean up markdown code blocks that AI might return
-            aiText = aiText
-                .replace(/```html\n?/gi, '')  // Remove ```html
-                .replace(/```\n?/g, '')       // Remove closing ```
+        === PATIENT MEDICAL HISTORY ===
+        ${medicalHistory}
+
+        === CURRENT VISIT CHAT LOG ===
+        ${chatLog}
+
+        === INSTRUCTIONS ===
+        - Consider patterns between past history and current symptoms
+        - Flag any concerning symptom combinations
+        - Suggest relevant tests or examinations if applicable
+        - Include confidence percentages if possible (e.g., "Migraine (75%)")
+        - Keep each hint brief (2-5 words max)
+        - Return ONLY a JSON array of strings, like: ["Hint 1 (80%)", "Hint 2", "Consider X test"]
+        - Do NOT include any other text, just the JSON array
+        `;
+
+        try {
+            // Make both API calls in parallel for speed
+            const [summaryResponse, hintsResponse] = await Promise.all([
+                fetch(`${GEMINI_API_URL}?key=${getApiKey()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: summaryPrompt }] }]
+                    })
+                }),
+                fetch(`${GEMINI_API_URL}?key=${getApiKey()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: diagnosisPrompt }] }]
+                    })
+                })
+            ]);
+
+            // Process Summary
+            const summaryData = await summaryResponse.json();
+            let summaryText = summaryData.candidates[0].content.parts[0].text;
+            summaryText = summaryText
+                .replace(/```html\n?/gi, '')
+                .replace(/```\n?/g, '')
+                .trim();
+            summaryBox.innerHTML = summaryText;
+
+            // Process Diagnosis Hints
+            const hintsData = await hintsResponse.json();
+            let hintsText = hintsData.candidates[0].content.parts[0].text;
+
+            // Clean and parse JSON array
+            hintsText = hintsText
+                .replace(/```json\n?/gi, '')
+                .replace(/```\n?/g, '')
                 .trim();
 
-            summaryBox.innerHTML = aiText;
+            try {
+                const hintsArray = JSON.parse(hintsText);
+                hintsBox.innerHTML = hintsArray
+                    .map(hint => `<div class="hint-tag">${hint}</div>`)
+                    .join('');
+            } catch (parseError) {
+                // Fallback: If not valid JSON, try to extract hints manually
+                console.warn('Could not parse hints as JSON, using fallback');
+                const fallbackHints = hintsText
+                    .split('\n')
+                    .filter(line => line.trim())
+                    .slice(0, 5)
+                    .map(hint => hint.replace(/^[-•*]\s*/, '').trim());
 
-            // Generate Hints
+                hintsBox.innerHTML = fallbackHints
+                    .map(hint => `<div class="hint-tag">${hint}</div>`)
+                    .join('');
+            }
+
+        } catch (e) {
+            console.error("AI Analysis Failed", e);
+            summaryBox.innerHTML = "Failed to generate AI summary. Please review chat logs.";
             hintsBox.innerHTML = `
                 <div class="hint-tag">Review Symptoms</div>
                 <div class="hint-tag">Check Vitals</div>
-                <div class="hint-tag">History Analysis</div>
+                <div class="hint-tag">Compare with History</div>
             `;
-
-        } catch (e) {
-            console.error("AI Summary Failed", e);
-            summaryBox.innerHTML = "Failed to generate AI summary. Please review chat logs.";
         }
     },
 
@@ -200,5 +268,50 @@ const doctorApp = {
         document.getElementById('rxMedicine').value = '';
         document.getElementById('rxDosage').value = '';
         document.getElementById('rxNotes').value = '';
+    },
+
+    // ===== LIVE CALL FUNCTIONS =====
+
+    async startLiveCall() {
+        if (!this.currentAppointment) {
+            alert('Please select an appointment first');
+            return;
+        }
+
+        // Initialize CallManager if not already
+        if (!CallManager.socket) {
+            CallManager.init('doctor', this.doctorName);
+        }
+
+        // First, notify the patient about the incoming call
+        CallManager.socket.emit('initiate-call', {
+            appointmentId: this.currentAppointment.id,
+            patientId: this.currentAppointment.patientId,
+            doctorName: this.doctorName
+        });
+
+        // Join the consultation room
+        const joined = await CallManager.joinRoom(this.currentAppointment.id);
+
+        if (joined) {
+            // Update UI
+            document.getElementById('startCallBtn').style.display = 'none';
+            document.getElementById('endCallBtn').style.display = 'inline-block';
+
+            // Clear transcript for new call
+            const transcriptBox = document.getElementById('liveTranscription');
+            if (transcriptBox) {
+                transcriptBox.innerHTML = '<p style="color: #64748b; font-style: italic;">Waiting for patient to join...</p>';
+            }
+        }
+    },
+
+    endLiveCall() {
+        CallManager.endCall();
+
+        // Update UI
+        document.getElementById('startCallBtn').style.display = 'inline-block';
+        document.getElementById('endCallBtn').style.display = 'none';
+        document.getElementById('callStatus').textContent = 'Call ended';
     }
 };

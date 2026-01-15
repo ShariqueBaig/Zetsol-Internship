@@ -116,20 +116,35 @@
                             <h2 id="currentPatientName">Patient Name</h2>
                             <span class="badge" id="visitReason">Reason</span>
                         </div>
-                        <div class="consultation-timer">00:00</div>
+                        <div class="call-controls">
+                            <span id="callStatus" class="call-status">Not in call</span>
+                            <button id="startCallBtn" class="btn btn-call" onclick="doctorApp.startLiveCall()">
+                                🎤 Start Call
+                            </button>
+                            <button id="endCallBtn" class="btn btn-end-call" onclick="doctorApp.endLiveCall()"
+                                style="display: none;">
+                                📞 End Call
+                            </button>
+                        </div>
                     </div>
 
                     <div class="consultation-grid">
                         <!-- AI Summary & Live Notes -->
                         <div class="consultation-panel">
-                            <h4>AI Patient Summary</h4>
+                            <h4>📋 Patient Medical History</h4>
+                            <div class="ai-card" id="medicalHistory"
+                                style="max-height: 120px; overflow-y: auto; background: #1e293b; border-left: 3px solid #f59e0b;">
+                                <span class="placeholder">No prior medical records</span>
+                            </div>
+
+                            <h4 style="margin-top: 20px">AI Patient Summary</h4>
                             <div class="ai-card" id="aiSummary">
                                 Loading AI summary...
                             </div>
 
-                            <h4 style="margin-top: 20px">Live Transcription</h4>
+                            <h4 style="margin-top: 20px">💬 Chat History</h4>
                             <div class="transcription-box" id="liveTranscription">
-                                <span class="placeholder">Listening to conversation...</span>
+                                <span class="placeholder">No chat transcript available</span>
                             </div>
                         </div>
 
@@ -224,8 +239,10 @@
     </div>
 
     <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
     <script src="avatar-poc/storage.js"></script>
     <script src="avatar-poc/script.js"></script>
+    <script src="avatar-poc/call.js"></script>
     <script src="avatar-poc/doctor.js"></script>
 </body>
 

@@ -88,7 +88,8 @@ const StorageService = {
                 time: new Date(a.appointment_time).toLocaleString(),
                 status: a.status,
                 chatHistory: a.chat_history,
-                aiSummary: a.ai_summary
+                aiSummary: a.ai_summary,
+                medicalHistory: a.medical_history || '' // Patient's past medical records
             }));
         } catch (error) {
             console.error('Failed to fetch appointments:', error);
