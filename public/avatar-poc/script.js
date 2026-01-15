@@ -820,6 +820,89 @@ async function initApp() {
     }
 }
 
+// ===== PATIENT CALL HANDLING =====
+// Listen for incoming calls from doctors
+
+function initPatientCallListener() {
+    const user = getCurrentUser();
+    const role = getCurrentRole();
+
+    if (role !== 'patient' || !user) return;
+
+    // Initialize CallManager for patient
+    if (typeof CallManager !== 'undefined' && !CallManager.socket) {
+        CallManager.init('patient', user.full_name);
+
+        // Register this patient with the server so doctors can call them
+        CallManager.socket.emit('register-patient', {
+            patientId: user.id,
+            patientName: user.full_name
+        });
+        console.log('[Patient] Registered for incoming calls, ID:', user.id);
+
+        // Listen for incoming call notification from doctor
+        CallManager.socket.on('incoming-call', ({ appointmentId, doctorName, roomId }) => {
+            console.log('[Patient] Incoming call from', doctorName, 'for appointment', appointmentId);
+            showIncomingCallBanner(doctorName, appointmentId);
+        });
+    }
+}
+
+function showIncomingCallBanner(doctorName, appointmentId) {
+    // Remove existing banner if any
+    const existing = document.querySelector('.incoming-call-banner');
+    if (existing) existing.remove();
+
+    // Store appointment ID for when patient accepts
+    window.pendingCallAppointmentId = appointmentId;
+
+    const banner = document.createElement('div');
+    banner.className = 'incoming-call-banner';
+    banner.innerHTML = `
+        <h3>📞 Incoming Call</h3>
+        <p>${doctorName} is calling you for your consultation</p>
+        <div class="call-actions">
+            <button class="btn btn-call" onclick="acceptIncomingCall()">✓ Accept</button>
+            <button class="btn btn-end-call" onclick="declineIncomingCall()">✗ Decline</button>
+        </div>
+    `;
+    document.body.appendChild(banner);
+
+    // Play notification sound (if available)
+    try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp6di4OAj5ibmoZ1bmt5jJ+jo5qLfnp9hpKhpqOXiXx6foaNmJ6XiHd2e4OOmZ6bjntzd3qDj5ydmox8dXh8h5KcnZaIdXZ5gY2YnZuQgnZ1e4KNmJ2bkYN2dXuCjZidm5GDdnV7go2YnZuRg3Z1e4KNmJ2bkYN2dA==');
+        audio.volume = 0.5;
+        audio.play().catch(() => { });
+    } catch (e) { }
+}
+
+async function acceptIncomingCall() {
+    const banner = document.querySelector('.incoming-call-banner');
+    if (banner) banner.remove();
+
+    // Use the stored appointment ID from the incoming call
+    const appointmentId = window.pendingCallAppointmentId;
+
+    if (appointmentId) {
+        await CallManager.joinRoom(appointmentId);
+
+        // Show call status in patient UI
+        const statusBadge = document.getElementById('status');
+        if (statusBadge) {
+            statusBadge.textContent = 'In call with doctor';
+            statusBadge.className = 'status-badge speaking';
+        }
+    }
+}
+
+function declineIncomingCall() {
+    const banner = document.querySelector('.incoming-call-banner');
+    if (banner) banner.remove();
+}
+
+// Initialize patient call listener after app loads
+setTimeout(initPatientCallListener, 2000);
+
 // Start app on load
 document.addEventListener('DOMContentLoaded', initApp);
 
