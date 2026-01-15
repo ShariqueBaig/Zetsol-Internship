@@ -886,12 +886,47 @@ async function acceptIncomingCall() {
     if (appointmentId) {
         await CallManager.joinRoom(appointmentId);
 
-        // Show call status in patient UI
-        const statusBadge = document.getElementById('status');
-        if (statusBadge) {
-            statusBadge.textContent = 'In call with doctor';
-            statusBadge.className = 'status-badge speaking';
-        }
+        // Show in-call UI for patient
+        showPatientInCallUI();
+    }
+}
+
+function showPatientInCallUI() {
+    // Remove existing in-call UI if any
+    const existing = document.querySelector('.patient-in-call-ui');
+    if (existing) existing.remove();
+
+    const inCallUI = document.createElement('div');
+    inCallUI.className = 'patient-in-call-ui incoming-call-banner';
+    inCallUI.style.border = '2px solid #22c55e';
+    inCallUI.innerHTML = `
+        <h3>🎙️ In Call with Doctor</h3>
+        <p id="patientCallStatus" style="color: #4ade80;">Connected - speak to see transcription</p>
+        <div id="patientTranscript" style="max-height: 150px; overflow-y: auto; text-align: left; margin: 10px 0; padding: 10px; background: #0f172a; border-radius: 8px; font-size: 0.9rem;">
+            <p style="color: #64748b; font-style: italic;">Listening...</p>
+        </div>
+        <div class="call-actions">
+            <button class="btn btn-end-call" onclick="endPatientCall()">📞 End Call</button>
+        </div>
+    `;
+    document.body.appendChild(inCallUI);
+
+    // Set this as the transcript box for CallManager
+    window.patientTranscriptBox = document.getElementById('patientTranscript');
+}
+
+function endPatientCall() {
+    CallManager.endCall();
+
+    // Remove in-call UI
+    const inCallUI = document.querySelector('.patient-in-call-ui');
+    if (inCallUI) inCallUI.remove();
+
+    // Reset status
+    const statusBadge = document.getElementById('status');
+    if (statusBadge) {
+        statusBadge.textContent = 'Online';
+        statusBadge.className = 'status-badge';
     }
 }
 

@@ -4,7 +4,7 @@
  * API-based storage layer - replaces localStorage with backend API calls
  */
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 // Get current logged-in user from session
 function getCurrentUser() {
