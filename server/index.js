@@ -386,13 +386,32 @@ io.on('connection', (socket) => {
     socket.on('end-call', ({ roomId }) => {
         const room = consultationRooms.get(roomId);
         if (room) {
+            const appointmentId = roomId.split('-')[1];
+
             // Save transcript to appointment
             const transcriptText = room.transcript
-                .map(t => `${t.speaker}: ${t.text}`)
+                .map(t => `[${t.timestamp}] ${t.speaker}: ${t.text}`)
                 .join('\n');
+
+            console.log(`[Call] Ending call for Room ${roomId}`);
+            console.log(`[Call] Saving ${room.transcript.length} transcript items to DB Appointment ${appointmentId}`);
+
+            // Update database
+            if (transcriptText) {
+                try {
+                    run('UPDATE appointments SET chat_history = ? WHERE id = ?',
+                        [transcriptText, appointmentId]);
+                    console.log('[Call] Transcript saved to DB successfully');
+                } catch (err) {
+                    console.error('[Call] Failed to save transcript to DB:', err);
+                }
+            }
 
             // Notify all participants
             io.to(roomId).emit('call-ended', { transcript: transcriptText });
+
+            // Cleanup room
+            consultationRooms.delete(roomId);
         }
     });
 
@@ -408,7 +427,8 @@ io.on('connection', (socket) => {
 async function startServer() {
     await initDatabase();
 
-    server.listen(PORT, () => {
+    const PORT = process.env.PORT || 3000;
+    server.listen(PORT, '0.0.0.0', () => {
         console.log(`
     ╔═══════════════════════════════════════╗
     ║   MedAssist Server Running!           ║
