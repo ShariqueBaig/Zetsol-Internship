@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const http = require('http');
 const { Server } = require('socket.io');
 const { initDatabase, run, get, all, insert, saveDatabase } = require('./db');
+const { seedDatabase } = require('./seed');
 
 const app = express();
 const server = http.createServer(app);
@@ -426,6 +427,17 @@ io.on('connection', (socket) => {
 
 async function startServer() {
     await initDatabase();
+
+    // Auto-seed if database is empty (for Koyeb/Cloud deployments)
+    try {
+        const result = get("SELECT count(*) as count FROM doctors");
+        if (!result || result.count === 0) {
+            console.log('Docs table empty. Running auto-seeder...');
+            await seedDatabase();
+        }
+    } catch (err) {
+        console.error('Auto-seed check failed:', err);
+    }
 
     const PORT = process.env.PORT || 3000;
     server.listen(PORT, '0.0.0.0', () => {

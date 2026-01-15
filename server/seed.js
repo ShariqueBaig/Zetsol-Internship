@@ -161,8 +161,12 @@ async function seedDatabase() {
     console.log('   Patients: any email above with password "patient123"');
 }
 
-// Run seeder
-seedDatabase().catch(err => {
-    console.error('Seeding failed:', err);
-    process.exit(1);
-});
+// Run seeder if executed directly
+if (require.main === module) {
+    seedDatabase().catch(err => {
+        console.error('Seeding failed:', err);
+        process.exit(1);
+    });
+}
+
+module.exports = { seedDatabase };
