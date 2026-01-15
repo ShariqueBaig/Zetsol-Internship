@@ -428,19 +428,8 @@ io.on('connection', (socket) => {
 async function startServer() {
     await initDatabase();
 
-    // Auto-seed if database is empty (for Koyeb/Cloud deployments)
-    try {
-        const result = get("SELECT count(*) as count FROM doctors");
-        if (!result || result.count === 0) {
-            console.log('Docs table empty. Running auto-seeder...');
-            await seedDatabase();
-        }
-    } catch (err) {
-        console.error('Auto-seed check failed:', err);
-    }
-
     const PORT = process.env.PORT || 3000;
-    server.listen(PORT, '0.0.0.0', () => {
+    server.listen(PORT, '0.0.0.0', async () => {
         console.log(`
     ╔═══════════════════════════════════════╗
     ║   MedAssist Server Running!           ║
@@ -448,6 +437,18 @@ async function startServer() {
     ║   Socket.io: Enabled                  ║
     ╚═══════════════════════════════════════╝
         `);
+
+        // Auto-seed if database is empty (Runs in background after server starts)
+        try {
+            const result = get("SELECT count(*) as count FROM doctors");
+            if (!result || result.count === 0) {
+                console.log('Docs table empty. Running auto-seeder...');
+                await seedDatabase();
+                console.log('Auto-seed complete!');
+            }
+        } catch (err) {
+            console.error('Auto-seed check failed:', err);
+        }
     });
 }
 
