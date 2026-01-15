@@ -95,6 +95,13 @@ function saveDatabase() {
     if (db) {
         const data = db.export();
         const buffer = Buffer.from(data);
+
+        // Ensure directory exists
+        const dir = path.dirname(dbPath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+
         fs.writeFileSync(dbPath, buffer);
     }
 }
