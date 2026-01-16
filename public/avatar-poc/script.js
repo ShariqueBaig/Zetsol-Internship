@@ -89,6 +89,61 @@ const app = {
                 </div>
             `).join('');
         }
+    },
+
+    async showPatientBookings() {
+        const user = getCurrentUser();
+        if (!user) return;
+
+        // Create modal if not exists
+        let modal = document.getElementById('bookingsModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'bookingsModal';
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2>📅 My Bookings</h2>
+                        <button class="close-btn" onclick="document.getElementById('bookingsModal').classList.remove('active')">×</button>
+                    </div>
+                    <div class="modal-body" id="bookingsListBody"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        const listBody = document.getElementById('bookingsListBody');
+        listBody.innerHTML = '<p style="text-align:center; color:#94a3b8">Loading bookings...</p>';
+        modal.classList.add('active');
+
+        try {
+            const response = await fetch(`/api/appointments?patient_id=${user.id}`);
+            const appointments = await response.json();
+
+            if (appointments.length === 0) {
+                listBody.innerHTML = '<p style="text-align:center; color:#94a3b8">No appointments found. Book a doctor to get started!</p>';
+            } else {
+                listBody.innerHTML = appointments.map(appt => {
+                    const statusColor = appt.status === 'upcoming' ? '#4ade80' : '#94a3b8';
+                    const formattedDate = new Date(appt.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    return `
+                        <div class="booking-card" style="background:#0f172a; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #334155;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <strong style="color:#e2e8f0;">Dr. ${appt.doctor_name}</strong>
+                                <span style="color:${statusColor}; font-size:0.8rem; text-transform:uppercase;">${appt.status}</span>
+                            </div>
+                            <div style="font-size:0.9rem; color:#38bdf8; margin-bottom:5px;">${appt.specialty || 'General'}</div>
+                            <div style="font-size:0.85rem; color:#94a3b8;">📅 ${formattedDate} at ${appt.time}</div>
+                            ${appt.reason ? `<div style="font-size:0.85rem; color:#64748b; margin-top:5px;">Reason: ${appt.reason}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error('Failed to load bookings:', error);
+            listBody.innerHTML = '<p style="text-align:center; color:#ef4444">Failed to load bookings</p>';
+        }
     }
 };
 
@@ -906,6 +961,7 @@ function showPatientInCallUI() {
             <p style="color: #64748b; font-style: italic;">Listening...</p>
         </div>
         <div class="call-actions">
+            <button id="patientMuteBtn" class="btn btn-mute" onclick="CallManager.toggleMute(); updatePatientMuteBtn()">🎤 Mute</button>
             <button class="btn btn-end-call" onclick="endPatientCall()">📞 End Call</button>
         </div>
     `;
@@ -933,6 +989,13 @@ function endPatientCall() {
 function declineIncomingCall() {
     const banner = document.querySelector('.incoming-call-banner');
     if (banner) banner.remove();
+}
+
+function updatePatientMuteBtn() {
+    const btn = document.getElementById('patientMuteBtn');
+    if (btn) {
+        btn.textContent = CallManager.isMuted ? '🔇 Unmute' : '🎤 Mute';
+    }
 }
 
 // Initialize patient call listener after app loads
