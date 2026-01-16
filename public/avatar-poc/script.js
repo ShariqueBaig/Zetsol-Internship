@@ -632,7 +632,7 @@ async function loadTimeSlots() {
     slotsContainer.innerHTML = '<p style="color:#94a3b8;">Loading slots...</p>';
 
     try {
-        const response = await fetch(`http://localhost:3000/api/doctors/${selectedDoctor.id}/slots?date=${selectedDate}`);
+        const response = await fetch(`/api/doctors/${selectedDoctor.id}/slots?date=${selectedDate}`);
         const slots = await response.json();
 
         let html = '';
