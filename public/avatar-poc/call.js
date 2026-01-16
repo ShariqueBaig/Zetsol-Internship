@@ -12,6 +12,7 @@ const CallManager = {
     role: null,
     userName: null,
     isInCall: false,
+    isMuted: false,
 
     // Speech recognition
     recognition: null,
@@ -496,6 +497,31 @@ const CallManager = {
         }
 
         this.updateStatus('Call ended');
+    },
+
+    // Toggle microphone mute
+    toggleMute() {
+        if (!this.localStream) {
+            console.log('[Call] No local stream to mute');
+            return false;
+        }
+
+        this.isMuted = !this.isMuted;
+
+        // Enable/disable all audio tracks
+        this.localStream.getAudioTracks().forEach(track => {
+            track.enabled = !this.isMuted;
+        });
+
+        // Update UI button if exists
+        const muteBtn = document.getElementById('muteBtn');
+        if (muteBtn) {
+            muteBtn.textContent = this.isMuted ? '🔇 Unmute' : '🎤 Mute';
+            muteBtn.classList.toggle('muted', this.isMuted);
+        }
+
+        console.log('[Call] Mute toggled:', this.isMuted);
+        return this.isMuted;
     },
 
     // Update status display

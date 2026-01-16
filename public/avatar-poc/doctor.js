@@ -297,6 +297,7 @@ const doctorApp = {
             // Update UI
             document.getElementById('startCallBtn').style.display = 'none';
             document.getElementById('endCallBtn').style.display = 'inline-block';
+            document.getElementById('muteBtn').style.display = 'inline-block';
 
             // Clear transcript for new call
             const transcriptBox = document.getElementById('liveTranscription');
@@ -312,6 +313,8 @@ const doctorApp = {
         // Update UI
         document.getElementById('startCallBtn').style.display = 'inline-block';
         document.getElementById('endCallBtn').style.display = 'none';
+        document.getElementById('muteBtn').style.display = 'none';
+        document.getElementById('muteBtn').textContent = '🎤 Mute'; // Reset text
         document.getElementById('callStatus').textContent = 'Call ended';
     }
 };
