@@ -101,6 +101,26 @@ const CallManager = {
             this.cleanup();
             this.updateStatus('Call ended');
 
+            // === UI CLEANUP FOR BOTH PARTIES ===
+
+            // 1. Patient: Remove the in-call overlay
+            const patientUI = document.querySelector('.patient-in-call-ui');
+            if (patientUI) patientUI.remove();
+
+            // 2. Doctor: Reset buttons
+            const startBtn = document.getElementById('startCallBtn');
+            const endBtn = document.getElementById('endCallBtn');
+            const muteBtn = document.getElementById('muteBtn');
+            const emptyState = document.querySelector('.empty-consultation');
+            const activeState = document.getElementById('activeConsultation');
+
+            if (startBtn && endBtn && muteBtn) {
+                startBtn.style.display = 'inline-block';
+                endBtn.style.display = 'none';
+                muteBtn.style.display = 'none';
+                muteBtn.textContent = '🎤 Mute';
+            }
+
             // Show transcript summary if we have content
             if (transcript) {
                 this.showTranscriptSummary(transcript);
