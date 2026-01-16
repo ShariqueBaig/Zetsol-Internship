@@ -19,6 +19,9 @@ const app = {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('patientScreen').classList.add('active');
 
+            // Show mobile nav for patients
+            if (window.mobileNav) mobileNav.updateVisibility('patient');
+
             // Init AI greeting only if first time or needed
             if (chatMessages.children.length === 0) {
                 const greeting = "Hello! I'm Dr. Ryan, your virtual health assistant. How can I help you today?";
@@ -26,6 +29,8 @@ const app = {
                 setTimeout(() => speak(greeting), 500);
             }
         } else if (role === 'doctor') {
+            // Hide mobile nav for doctors
+            if (window.mobileNav) mobileNav.updateVisibility('doctor');
             // Show Doctor Selection Modal instead of going straight to dashboard
             this.showDoctorLogin();
         }
@@ -998,9 +1003,59 @@ function updatePatientMuteBtn() {
     }
 }
 
+// ===== MOBILE NAVIGATION CONTROLLER =====
+const mobileNav = {
+    currentView: 'home',
+
+    goto(view) {
+        this.currentView = view;
+        this.updateActiveState(view);
+
+        switch (view) {
+            case 'home':
+                // Scroll to top, focus on chat
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                break;
+            case 'bookings':
+                app.showPatientBookings();
+                break;
+            case 'prescriptions':
+                app.showPatientPrescriptions();
+                break;
+            case 'settings':
+                showApiKeyModal();
+                break;
+        }
+    },
+
+    updateActiveState(activeView) {
+        document.querySelectorAll('.mobile-nav-item').forEach((item, index) => {
+            const views = ['home', 'bookings', 'prescriptions', 'settings'];
+            if (views[index] === activeView) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    },
+
+    // Show/hide based on role
+    updateVisibility(role) {
+        const nav = document.getElementById('mobileNav');
+        if (nav) {
+            // Only show for patients on mobile
+            nav.style.display = role === 'patient' ? '' : 'none';
+        }
+    }
+};
+
+// Expose to window
+window.mobileNav = mobileNav;
+
 // Initialize patient call listener after app loads
 setTimeout(initPatientCallListener, 2000);
 
 // Start app on load
 document.addEventListener('DOMContentLoaded', initApp);
+
 

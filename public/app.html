@@ -182,6 +182,28 @@
         </div>
     </div>
 
+    <!-- Mobile Bottom Navigation (Patient Only) -->
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-items">
+            <button class="mobile-nav-item active" onclick="mobileNav.goto('home')">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="mobile-nav-item" onclick="mobileNav.goto('bookings')">
+                <span class="nav-icon">📅</span>
+                <span>Bookings</span>
+            </button>
+            <button class="mobile-nav-item" onclick="mobileNav.goto('prescriptions')">
+                <span class="nav-icon">💊</span>
+                <span>Rx</span>
+            </button>
+            <button class="mobile-nav-item" onclick="mobileNav.goto('settings')">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+        </div>
+    </nav>
+
     <div class="footer">
         MedAssist AI POC • Powered by Google Gemini • For education only
     </div>

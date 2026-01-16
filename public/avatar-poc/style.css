@@ -1034,3 +1034,430 @@ h1 {
     overflow-y: auto;
     margin-bottom: 15px;
 }
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+/* Mobile Bottom Navigation */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, #0f172a 0%, #1e293b 100%);
+    border-top: 1px solid #334155;
+    padding: 8px 0;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    z-index: 1000;
+}
+
+.mobile-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 12px;
+    min-width: 60px;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.mobile-nav-item .nav-icon {
+    font-size: 1.4rem;
+}
+
+.mobile-nav-item span:last-child {
+    font-weight: 500;
+}
+
+/* Tablet Breakpoint (768px) */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        padding-bottom: 80px;
+        /* Space for bottom nav */
+    }
+
+    .consultation-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .doctor-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .appointments-sidebar {
+        width: 100%;
+        height: 200px;
+    }
+
+    .main-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .avatar-panel {
+        flex: none;
+        width: 100%;
+    }
+
+    .chat-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Small Tablet / Large Phone (600px) */
+@media (max-width: 600px) {
+    .mobile-nav {
+        display: block;
+    }
+
+    body {
+        padding: 10px;
+        padding-bottom: 85px;
+    }
+
+    .avatar-container {
+        width: 240px;
+        height: 240px;
+        margin: 0 auto 15px;
+    }
+
+    .chat-container {
+        height: 320px;
+    }
+
+    .quick-actions {
+        display: none;
+        /* Hide desktop quick actions, use bottom nav */
+    }
+
+    .time-slots-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Larger touch targets */
+    .btn,
+    .quick-btn,
+    .btn-sm {
+        min-height: 44px;
+        padding: 12px 16px;
+    }
+
+    .btn-mic {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .chat-input {
+        font-size: 16px;
+        /* Prevent iOS zoom on focus */
+        padding: 12px 16px;
+    }
+
+    /* Modal improvements */
+    .modal {
+        width: 95%;
+        max-width: none;
+        max-height: 85vh;
+        margin: 0 10px;
+    }
+
+    .modal-header {
+        padding: 15px;
+        position: sticky;
+        top: 0;
+        background: #1e293b;
+        z-index: 10;
+    }
+
+    .close-btn {
+        font-size: 2rem;
+        padding: 5px 10px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .doctor-card {
+        padding: 12px;
+    }
+
+    .doctor-avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1rem;
+    }
+
+    .role-cards {
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .role-card {
+        width: 100%;
+        max-width: 280px;
+        padding: 25px;
+    }
+
+    .role-icon {
+        font-size: 3rem;
+    }
+}
+
+/* Phone Breakpoint (480px) */
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+        padding-bottom: 85px;
+    }
+
+    .header {
+        margin-bottom: 10px;
+    }
+
+    .header h1 {
+        font-size: 1.3rem;
+    }
+
+    .subtitle {
+        font-size: 0.75rem;
+    }
+
+    .avatar-container {
+        width: 200px;
+        height: 200px;
+    }
+
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+
+    .chat-container {
+        height: 280px;
+        border-radius: 12px;
+    }
+
+    .chat-header {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+
+    .ai-badge {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+    }
+
+    .chat-messages {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .message {
+        max-width: 90%;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .chat-input-area {
+        padding: 8px;
+        gap: 6px;
+    }
+
+    .time-slots-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .time-slot {
+        padding: 12px 8px;
+        font-size: 0.8rem;
+        min-height: 44px;
+    }
+
+    /* Doctor dashboard mobile */
+    .doctor-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        padding-bottom: 15px;
+    }
+
+    .doctor-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .doctor-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .appointments-sidebar {
+        height: 180px;
+    }
+
+    .appointment-card {
+        padding: 10px;
+    }
+
+    .appt-time {
+        font-size: 0.8rem;
+        width: 50px;
+    }
+
+    .consultation-area {
+        padding: 12px;
+    }
+
+    .patient-banner {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .call-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .btn-call,
+    .btn-end-call {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .ai-card,
+    .transcription-box,
+    .hints-box,
+    .prescription-form {
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+
+    .form-input {
+        padding: 12px;
+        font-size: 16px;
+        /* Prevent iOS zoom */
+    }
+
+    textarea.form-input {
+        height: 70px;
+    }
+
+    /* Booking modal mobile */
+    .booking-details {
+        padding: 12px;
+    }
+
+    .booking-details p {
+        font-size: 0.85rem;
+    }
+
+    .book-btn {
+        padding: 14px;
+        font-size: 1rem;
+    }
+
+    /* Footer */
+    .footer {
+        font-size: 0.65rem;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+}
+
+/* Extra Small Phones (360px) */
+@media (max-width: 360px) {
+    .avatar-container {
+        width: 180px;
+        height: 180px;
+    }
+
+    .chat-container {
+        height: 250px;
+    }
+
+    .mobile-nav-item {
+        padding: 6px 10px;
+        min-width: 50px;
+    }
+
+    .mobile-nav-item .nav-icon {
+        font-size: 1.2rem;
+    }
+
+    .mobile-nav-item span:last-child {
+        font-size: 0.6rem;
+    }
+}
+
+/* Safe area for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .mobile-nav {
+        padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 600px) {
+        body {
+            padding-bottom: calc(85px + env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* Landscape mode adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    .avatar-container {
+        width: 150px;
+        height: 150px;
+    }
+
+    .chat-container {
+        height: 200px;
+    }
+
+    .mobile-nav {
+        padding: 4px 0;
+    }
+
+    .mobile-nav-item {
+        padding: 4px 12px;
+    }
+
+    .mobile-nav-item .nav-icon {
+        font-size: 1.2rem;
+    }
+
+    .mobile-nav-item span:last-child {
+        display: none;
+    }
+}
