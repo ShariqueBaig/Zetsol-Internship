@@ -119,7 +119,7 @@ app.get('/api/appointments', (req, res) => {
             FROM appointments a
             JOIN doctors d ON a.doctor_id = d.id
             WHERE a.patient_id = ?
-            ORDER BY a.appointment_date DESC, a.appointment_time DESC
+            ORDER BY a.appointment_time DESC
         `, [parseInt(patient_id)]);
     } else {
         appointments = all(`
@@ -127,23 +127,26 @@ app.get('/api/appointments', (req, res) => {
             FROM appointments a
             JOIN doctors d ON a.doctor_id = d.id
             JOIN patients p ON a.patient_id = p.id
-            ORDER BY a.appointment_date DESC
+            ORDER BY a.appointment_time DESC
         `);
     }
 
-    // Format for frontend
-    const formatted = appointments.map(a => ({
-        id: a.id,
-        doctor_id: a.doctor_id,
-        patient_id: a.patient_id,
-        doctor_name: a.doctor_name,
-        patient_name: a.patient_name,
-        specialty: a.specialty,
-        date: a.appointment_date,
-        time: a.appointment_time,
-        status: a.status,
-        reason: a.reason
-    }));
+    // Format for frontend - parse datetime into date and time
+    const formatted = appointments.map(a => {
+        const datetime = a.appointment_time ? new Date(a.appointment_time) : null;
+        return {
+            id: a.id,
+            doctor_id: a.doctor_id,
+            patient_id: a.patient_id,
+            doctor_name: a.doctor_name,
+            patient_name: a.patient_name,
+            specialty: a.specialty,
+            date: datetime ? datetime.toISOString().split('T')[0] : null,
+            time: datetime ? datetime.toTimeString().slice(0, 5) : null,
+            status: a.status,
+            reason: a.ai_summary || ''
+        };
+    });
 
     res.json(formatted);
 });
