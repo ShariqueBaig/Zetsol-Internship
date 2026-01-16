@@ -39,3 +39,8 @@ data/medassist.db
 *.njsproj
 *.sln
 *.sw?
+
+# Docker artifacts
+*.zip
+*.tar
+DOCKER_README.md
