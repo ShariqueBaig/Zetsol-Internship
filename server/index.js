@@ -108,6 +108,46 @@ app.patch('/api/patients/:id/medical-history', (req, res) => {
     res.json({ success: true });
 });
 
+// Get appointments (supports patient_id query param for reminders)
+app.get('/api/appointments', (req, res) => {
+    const { patient_id } = req.query;
+
+    let appointments;
+    if (patient_id) {
+        appointments = all(`
+            SELECT a.*, d.full_name as doctor_name, d.specialty
+            FROM appointments a
+            JOIN doctors d ON a.doctor_id = d.id
+            WHERE a.patient_id = ?
+            ORDER BY a.appointment_date DESC, a.appointment_time DESC
+        `, [parseInt(patient_id)]);
+    } else {
+        appointments = all(`
+            SELECT a.*, d.full_name as doctor_name, p.full_name as patient_name
+            FROM appointments a
+            JOIN doctors d ON a.doctor_id = d.id
+            JOIN patients p ON a.patient_id = p.id
+            ORDER BY a.appointment_date DESC
+        `);
+    }
+
+    // Format for frontend
+    const formatted = appointments.map(a => ({
+        id: a.id,
+        doctor_id: a.doctor_id,
+        patient_id: a.patient_id,
+        doctor_name: a.doctor_name,
+        patient_name: a.patient_name,
+        specialty: a.specialty,
+        date: a.appointment_date,
+        time: a.appointment_time,
+        status: a.status,
+        reason: a.reason
+    }));
+
+    res.json(formatted);
+});
+
 // ===== DOCTOR ROUTES =====
 
 // Get all doctors

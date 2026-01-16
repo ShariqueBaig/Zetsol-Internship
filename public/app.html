@@ -249,6 +249,17 @@
     <script src="avatar-poc/script.js"></script>
     <script src="avatar-poc/call.js"></script>
     <script src="avatar-poc/doctor.js"></script>
+    <script src="avatar-poc/reminders.js"></script>
+
+    <!-- Initialize reminders for patients -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('medassist_role');
+            if (role === 'patient' && window.ReminderService) {
+                ReminderService.init();
+            }
+        });
+    </script>
 </body>
 
 </html>
