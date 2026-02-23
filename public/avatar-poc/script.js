@@ -24,7 +24,7 @@ const app = {
 
             // Init AI greeting only if first time or needed
             if (chatMessages.children.length === 0) {
-                const greeting = "Hello! I'm Dr. Ryan, your virtual health assistant. How can I help you today?";
+                const greeting = "Assalam-o-Alaikum! I'm Dr. Ahmed, your virtual health assistant. How can I help you today?";
                 addMessage(greeting);
                 setTimeout(() => speak(greeting), 500);
             }
@@ -211,18 +211,23 @@ function saveApiKeyAndClose() {
 }
 
 // System prompt for the AI
-const SYSTEM_PROMPT = `You are Dr. Ryan, a virtual triage assistant. Your ONLY job is to:
+const SYSTEM_PROMPT = `You are Dr. Ahmed, a virtual triage assistant from Pakistan. Your ONLY job is to:
 
-1. **ASK QUESTIONS** - Gather patient information through focused questions:
-   - Duration: "How long have you had this?"
-   - Severity: "On a scale of 1-10, how bad is it?"
-   - Related symptoms: "Any fever, dizziness, or vomiting?"
-   - History: "Have you experienced this before?"
+1. **LANGUAGE SUPPORT** - You MUST understand and respond in both English and Urdu (اردو). 
+   - If the user speaks Urdu, you MUST respond in Urdu.
+   - If the user speaks English, you respond in English.
+   - Be polite and use culturally appropriate Pakistani greetings (e.g., Assalam-o-Alaikum).
 
-1. Ask 2-3 brief questions to understand the patient's symptoms (Duration, Severity, other symptoms).
-2. Recommend the appropriate specialist (e.g., Cardiologist, Dermatologist, General Physician).
-3. Ask "Shall I show you the available doctors?"
-4. IMPORTANT: If the user says "Yes" or agrees to book, DO NOT ask for location/zip code. Instead, ONLY say "Great. Showing available doctors now." and stop. The system will handle the rest.
+2. **ASK QUESTIONS** - Gather patient information through focused questions:
+   - Duration: "How long have you had this?" (یا یہ کتنے عرصے سے ہے؟)
+   - Severity: "On a scale of 1-10, how bad is it?" (1 سے 10 کے پیمانے پر، یہ کتنا شدید ہے؟)
+   - Related symptoms: "Any fever, dizziness, or vomiting?" (کیا بخار، چکر یا الٹی محسوس ہو رہی ہے؟)
+   - History: "Have you experienced this before?" (کیا آپ کو پہلے بھی ایسا ہوا ہے؟)
+
+3. Ask 2-3 brief questions to understand the patient's symptoms.
+4. Recommend the appropriate specialist (e.g., Cardiologist, Dermatologist, General Physician).
+5. Ask "Shall I show you the available doctors?" (کیا میں آپ کو دستیاب ڈاکٹر دکھاؤں؟)
+6. IMPORTANT: If the user says "Yes" or agrees to book, DO NOT ask for location/zip code. Instead, ONLY say "Great. Showing available doctors now." and stop.
 
 RULES:
 - Ask ONE question at a time (keep responses to 1-2 sentences)
@@ -271,7 +276,7 @@ async function callGeminiAPI(userMessage) {
             },
             {
                 role: 'model',
-                parts: [{ text: "Hello! I'm Dr. Ryan, your virtual health assistant. How can I help you today?" }]
+                parts: [{ text: "Assalam-o-Alaikum! I'm Dr. Ahmed, your virtual health assistant. How can I help you today?" }]
             },
             ...conversationHistory
         ],
@@ -309,8 +314,8 @@ async function callGeminiAPI(userMessage) {
         // Update Badge to show API is working
         const badge = document.querySelector('.ai-badge');
         if (badge) {
-            badge.textContent = 'Gemini 3 Flash';
-            badge.style.background = 'linear-gradient(135deg, #8b5cf6, #6366f1)'; // Purple
+            badge.textContent = 'Gemini (Urdu Enabled)';
+            badge.style.background = 'linear-gradient(135deg, #059669, #10b981)'; // Green for Urdu/Pakistan
             badge.title = 'Connected to Live API';
         }
 
@@ -553,6 +558,7 @@ function startRecording() {
     recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
+    recognition.lang = 'ur-PK'; // Enable Urdu recognition
 
     recognition.onstart = () => {
         isRecording = true;
@@ -858,7 +864,7 @@ async function initApp() {
 
             // Init AI greeting
             if (chatMessages && chatMessages.children.length === 0) {
-                const greeting = `Hello ${user.full_name}! I'm Dr. Ryan, your virtual health assistant. How can I help you today?`;
+                const greeting = `Assalam-o-Alaikum ${user.full_name}! I'm Dr. Ahmed, your virtual health assistant. How can I help you today?`;
                 addMessage(greeting);
                 setTimeout(() => speak(greeting), 500);
             }
