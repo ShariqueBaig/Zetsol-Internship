@@ -6,10 +6,119 @@
 // ===== APP CONTROLLER =====
 const app = {
     role: null,
+    lang: 'en',
+
+    translations: {
+        en: {
+            app_title: "MedAssist AI",
+            patient_subtitle: "Your Virtual Health Assistant",
+            select_role: "Select your role to continue",
+            patient: "Patient",
+            patient_desc: "Check symptoms & book doctors",
+            doctor: "Doctor",
+            doctor_desc: "Manage patients & consultations",
+            logout: "Logout",
+            ready: "Ready to help",
+            headache: "Headache",
+            book_doctor: "Book Doctor",
+            my_bookings: "📅 My Bookings",
+            my_prescriptions: "My Prescriptions",
+            conversation: "Conversation",
+            mic: "Mic",
+            describe_symptoms: "Describe your symptoms...",
+            send: "Send",
+            dr_ryan: "Dr. Ahmed",
+            doctors_for: "for Doctors",
+            today_appointments: "Today's Appointments",
+            no_appointments: "No appointments yet",
+            select_patient: "Select a patient to start consultation",
+            review_ai: "Review AI summaries and manage prescriptions efficiently.",
+            start_call: "🎤 Start Call",
+            mute: "🎤 Mute",
+            end_call: "📞 End Call",
+            medical_history: "📋 Patient Medical History",
+            ai_summary: "AI Patient Summary",
+            chat_history: "💬 Chat History",
+            ai_hints: "AI Diagnosis Hints",
+            prescription: "Prescription",
+            issue_rx: "Issue Prescription"
+        },
+        ur: {
+            app_title: "میڈ اسسٹ اے آئی",
+            patient_subtitle: "آپ کا ورچوئل ہیلتھ اسسٹنٹ",
+            select_role: "جاری رکھنے کے لیے اپنا کردار منتخب کریں",
+            patient: "مریض",
+            patient_desc: "علامات چیک کریں اور ڈاکٹر بک کریں",
+            doctor: "ڈاکٹر",
+            doctor_desc: "مریضوں اور مشورے کا انتظام کریں",
+            logout: "لاگ آؤٹ",
+            ready: "مدد کے لیے تیار ہے",
+            headache: "سر درد",
+            book_doctor: "ڈاکٹر بک کریں",
+            my_bookings: "📅 میری بکنگ",
+            my_prescriptions: "میرے نسخے",
+            conversation: "گفتگو",
+            mic: "مائیک",
+            describe_symptoms: "اپنی علامات بیان کریں...",
+            send: "بھیجیں",
+            dr_ryan: "ڈاکٹر احمد",
+            doctors_for: "ڈاکٹروں کے لیے",
+            today_appointments: "آج کی اپائنٹمنٹس",
+            no_appointments: "ابھی تک کوئی اپائنٹمنٹ نہیں ہے",
+            select_patient: "مشورہ شروع کرنے کے لیے مریض کا انتخاب کریں",
+            review_ai: "اے آئی خلاصوں کا جائزہ لیں اور نسخوں کا موثر طریقے سے انتظام کریں۔",
+            start_call: "🎤 کال شروع کریں",
+            mute: "🎤 میوٹ",
+            end_call: "📞 کال ختم کریں",
+            medical_history: "📋 مریض کی طبی تاریخ",
+            ai_summary: "اے آئی مریض کا خلاصہ",
+            chat_history: "💬 چیٹ کی تاریخ",
+            ai_hints: "اے آئی تشخیص کے اشارے",
+            prescription: "نسخہ (دوا)",
+            issue_rx: "نسخہ جاری کریں"
+        }
+    },
 
     init() {
         console.log('App Initialized');
-        // Initial state is handled by index.html showing #authScreen
+        // Check saved language
+        const savedLang = localStorage.getItem('medassist_lang') || 'en';
+        this.setLanguage(savedLang);
+    },
+
+    toggleLanguage() {
+        const newLang = this.lang === 'en' ? 'ur' : 'en';
+        this.setLanguage(newLang);
+    },
+
+    setLanguage(lang) {
+        this.lang = lang;
+        localStorage.setItem('medassist_lang', lang);
+
+        // Update document attributes
+        document.documentElement.lang = lang;
+        document.body.dir = lang === 'ur' ? 'rtl' : 'ltr';
+
+        // Update UI Text
+        const dict = this.translations[lang];
+        document.querySelectorAll('[data-t]').forEach(el => {
+            const key = el.getAttribute('data-t');
+            if (dict[key]) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = dict[key];
+                } else {
+                    el.textContent = dict[key];
+                }
+            }
+        });
+
+        // Update specific complex buttons
+        const langBtns = document.querySelectorAll('.lang-toggle, .lang-btn-float');
+        langBtns.forEach(btn => {
+            btn.textContent = lang === 'en' ? '🌍 اردو' : '🌍 English';
+        });
+
+        console.log('Language set to:', lang);
     },
 
     switchRole(role) {
