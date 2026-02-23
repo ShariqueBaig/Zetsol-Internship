@@ -30,12 +30,12 @@ async function seedDatabase() {
 
     // ===== SEED DOCTORS =====
     const doctors = [
-        ['sarah.chen@medassist.com', hashPassword('doctor123'), 'Dr. Sarah Chen', 'General Physician', 4.8, '12 years', 'doctor1.png'],
-        ['michael.ross@medassist.com', hashPassword('doctor123'), 'Dr. Michael Ross', 'Cardiologist', 4.9, '20 years', 'doctor2.png'],
-        ['emily.watson@medassist.com', hashPassword('doctor123'), 'Dr. Emily Watson', 'Dermatologist', 4.7, '8 years', 'doctor3.png'],
-        ['james.lee@medassist.com', hashPassword('doctor123'), 'Dr. James Lee', 'Pediatrician', 4.9, '15 years', 'doctor4.png'],
-        ['linda.martinez@medassist.com', hashPassword('doctor123'), 'Dr. Linda Martinez', 'Neurologist', 4.8, '18 years', 'doctor5.png'],
-        ['robert.patel@medassist.com', hashPassword('doctor123'), 'Dr. Robert Patel', 'General Physician', 4.6, '5 years', 'doctor6.png']
+        ['fatima.rizwan@medassist.com', hashPassword('doctor123'), 'Dr. Fatima Rizwan', 'General Physician', 4.8, '12 years', 'doctor1.png'],
+        ['usman.ali@medassist.com', hashPassword('doctor123'), 'Dr. Usman Ali', 'Cardiologist', 4.9, '20 years', 'doctor2.png'],
+        ['zainab.bashir@medassist.com', hashPassword('doctor123'), 'Dr. Zainab Bashir', 'Dermatologist', 4.7, '8 years', 'doctor3.png'],
+        ['bilal.malik@medassist.com', hashPassword('doctor123'), 'Dr. Bilal Malik', 'Pediatrician', 4.9, '15 years', 'doctor4.png'],
+        ['sadia.pervez@medassist.com', hashPassword('doctor123'), 'Dr. Sadia Pervez', 'Neurologist', 4.8, '18 years', 'doctor5.png'],
+        ['faisal.mahmood@medassist.com', hashPassword('doctor123'), 'Dr. Faisal Mahmood', 'General Physician', 4.6, '5 years', 'doctor6.png']
     ];
 
     doctors.forEach(doc => {
@@ -46,46 +46,46 @@ async function seedDatabase() {
     // ===== SEED PATIENTS =====
     const patients = [
         [
-            'john.doe@email.com',
+            'sharique.baig@email.com',
             hashPassword('patient123'),
-            'John Doe',
-            '+1-555-0101',
+            'Sharique Baig',
+            '+92-300-1234567',
             '1985-03-15',
             'male',
             'Patient has history of recurring migraines, typically stress-induced. Mild hypertension noted (BP 130/85). Last visit on 2024-12-15: consulted for skin rash on forearms, diagnosed as contact dermatitis. Recommended topical corticosteroid.'
         ],
         [
-            'jane.smith@email.com',
+            'maira.aijaz@email.com',
             hashPassword('patient123'),
-            'Jane Smith',
-            '+1-555-0102',
+            'Maira Aijaz',
+            '+92-300-7654321',
             '1990-07-22',
             'female',
             'Seasonal allergies (spring/fall). Visited on 2024-11-20 for persistent eczema on hands - referred to dermatology. Follow-up showed improvement with prescribed moisturizing regimen.'
         ],
         [
-            'alex.kumar@email.com',
+            'mohammad.suffiyan@email.com',
             hashPassword('patient123'),
-            'Alex Kumar',
-            '+1-555-0103',
+            'Mohammad Suffiyan',
+            '+92-300-1122334',
             '1978-11-08',
             'male',
             'Visit 1 (2024-10-05): Reported mild chest discomfort during exercise. ECG recommended, results normal. Visit 2 (2024-12-01): Follow-up, symptoms resolved. Continue monitoring.'
         ],
         [
-            'maria.garcia@email.com',
+            'ayisha.siddiqui@email.com',
             hashPassword('patient123'),
-            'Maria Garcia',
-            '+1-555-0104',
+            'Ayisha Siddiqui',
+            '+92-300-5566778',
             '1995-01-30',
             'female',
             'First visit on 2025-01-02: General checkup. No major concerns. Vitals normal. Recommended annual flu vaccine.'
         ],
         [
-            'david.wilson@email.com',
+            'zeeshan.arshad@email.com',
             hashPassword('patient123'),
-            'David Wilson',
-            '+1-555-0105',
+            'Zeeshan Arshad',
+            '+92-300-9988776',
             '1982-09-14',
             'male',
             '' // New patient, no history
