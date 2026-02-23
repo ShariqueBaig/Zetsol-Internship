@@ -41,7 +41,31 @@ const app = {
             chat_history: "💬 Chat History",
             ai_hints: "AI Diagnosis Hints",
             prescription: "Prescription",
-            issue_rx: "Issue Prescription"
+            issue_rx: "Issue Prescription",
+            book_appointment: "Book an Appointment",
+            booking_step1: "Step 1: Select a doctor",
+            recommended: "Recommended",
+            recommended_desc: "recommended",
+            years: "years",
+            booking_step2: "Step 2: Select date & time",
+            btn_select_slot: "Select a doctor and time slot",
+            btn_select_time: "Select a time slot",
+            btn_book_with: "Book {time} with {doctor}",
+            loading_slots: "Loading slots...",
+            no_slots: "No slots available",
+            booking_success: "Appointment Booked!",
+            booking_confirmed: "Your appointment has been confirmed.",
+            doc_label: "Doctor:",
+            spec_label: "Specialty:",
+            datetime_label: "Date & Time:",
+            conf_label: "Confirmation #:",
+            done: "Done",
+            // Specialties
+            "General Physician": "General Physician",
+            "Cardiologist": "Cardiologist",
+            "Dermatologist": "Dermatologist",
+            "Neurologist": "Neurologist",
+            "Pediatrician": "Pediatrician"
         },
         ur: {
             app_title: "میڈ اسسٹ اے آئی",
@@ -75,7 +99,31 @@ const app = {
             chat_history: "💬 چیٹ کی تاریخ",
             ai_hints: "اے آئی تشخیص کے اشارے",
             prescription: "نسخہ (دوا)",
-            issue_rx: "نسخہ جاری کریں"
+            issue_rx: "نسخہ جاری کریں",
+            book_appointment: "اپائنٹمنٹ بک کریں",
+            booking_step1: "مرحلہ 1: ڈاکٹر کا انتخاب کریں",
+            recommended: "تجویز کردہ",
+            recommended_desc: "تجویز کردہ",
+            years: "سال",
+            booking_step2: "مرحلہ 2: تاریخ اور وقت منتخب کریں",
+            btn_select_slot: "ڈاکٹر اور ٹائم سلاٹ منتخب کریں",
+            btn_select_time: "ٹائم سلاٹ منتخب کریں",
+            btn_book_with: "{doctor} کے ساتھ {time} بک کریں",
+            loading_slots: "سلاٹس لوڈ ہو رہے ہیں...",
+            no_slots: "کوئی سلاٹ دستیاب نہیں ہے",
+            booking_success: "اپائنٹمنٹ بک ہو گئی!",
+            booking_confirmed: "آپ کی اپائنٹمنٹ کی تصدیق ہو گئی ہے۔",
+            doc_label: "ڈاکٹر:",
+            spec_label: "خصوصیت:",
+            datetime_label: "تاریخ اور وقت:",
+            conf_label: "تصدیقی نمبر:",
+            done: "مکمل",
+            // Specialties
+            "General Physician": "جنرل فزیشن",
+            "Cardiologist": "ماہر امراض قلب",
+            "Dermatologist": "ماہر امراض جلد",
+            "Neurologist": "ماہر امراض اعصاب",
+            "Pediatrician": "ماہر امراض اطفال"
         }
     },
 
@@ -738,6 +786,10 @@ function openBookingModal(specialty = 'General Physician') {
 
     const modal = document.getElementById('bookingModal');
     const modalBody = document.getElementById('modalBody');
+    const dict = app.translations[app.lang];
+
+    // Update Header
+    modal.querySelector('h2').textContent = dict.book_appointment;
 
     // Fetch doctors from Mock DB
     const allDoctors = StorageService.getDoctorsSync();
@@ -747,21 +799,24 @@ function openBookingModal(specialty = 'General Physician') {
     const otherDocs = allDoctors.filter(d => d.specialty !== specialty);
     const sortedDoctors = [...recommendedDocs, ...otherDocs];
 
+    const displaySpecialty = dict[specialty] || specialty;
+
     let html = `
-        <p style="color: #94a3b8; margin-bottom: 15px;">Step 1: Select a doctor (${specialty} recommended)</p>
+        <p style="color: #94a3b8; margin-bottom: 15px;">${dict.booking_step1} (${displaySpecialty} ${dict.recommended_desc})</p>
         <div class="doctors-list">
     `;
 
     sortedDoctors.forEach((doc, index) => {
         const initials = doc.name.split(' ').map(n => n[0]).join('').substring(0, 2);
         const isRecommended = doc.specialty === specialty;
+        const docSpecialty = dict[doc.specialty] || doc.specialty;
 
         html += `
             <div class="doctor-card ${isRecommended ? 'recommended' : ''}" id="doctor-${index}" onclick="selectDoctor(${index}, ${doc.id}, '${doc.name}', '${doc.specialty}')">
                 <div class="doctor-avatar">${initials}</div>
                 <div class="doctor-info">
-                    <div class="doctor-name">${doc.name} ${isRecommended ? '<span style="color:#22c55e; font-size:0.8rem;">★ Recommended</span>' : ''}</div>
-                    <div class="doctor-specialty">${doc.specialty} • ${doc.experience}</div>
+                    <div class="doctor-name">${doc.name} ${isRecommended ? `<span style="color:#22c55e; font-size:0.8rem;">★ ${dict.recommended}</span> ` : ''}</div>
+                    <div class="doctor-specialty">${docSpecialty} • ${doc.experience ? doc.experience.replace('years', dict.years) : ''}</div>
                     <div class="doctor-meta">
                         <span class="doctor-rating">★ ${doc.rating}</span>
                     </div>
@@ -772,11 +827,11 @@ function openBookingModal(specialty = 'General Physician') {
 
     html += `</div>
         <div id="slotSection" style="display: none;">
-            <p style="color: #94a3b8; margin: 20px 0 10px;">Step 2: Select date & time</p>
+            <p style="color: #94a3b8; margin: 20px 0 10px;">${dict.booking_step2}</p>
             <input type="date" id="appointmentDate" class="form-input" style="margin-bottom: 15px;" onchange="loadTimeSlots()">
             <div id="timeSlots" class="time-slots-grid"></div>
         </div>
-        <button class="book-btn" id="bookBtn" onclick="confirmBooking()" disabled>Select a doctor and time slot</button>
+        <button class="book-btn" id="bookBtn" onclick="confirmBooking()" disabled>${dict.btn_select_slot}</button>
     `;
 
     modalBody.innerHTML = html;
@@ -813,18 +868,19 @@ async function selectDoctor(index, doctorId, name, specialty) {
     // Update button
     const bookBtn = document.getElementById('bookBtn');
     bookBtn.disabled = true;
-    bookBtn.textContent = 'Select a time slot';
+    bookBtn.textContent = app.translations[app.lang].btn_select_time;
 }
 
 async function loadTimeSlots() {
     if (!selectedDoctor) return;
+    const dict = app.translations[app.lang];
 
     const dateInput = document.getElementById('appointmentDate');
     selectedDate = dateInput.value;
     selectedSlot = null;
 
     const slotsContainer = document.getElementById('timeSlots');
-    slotsContainer.innerHTML = '<p style="color:#94a3b8;">Loading slots...</p>';
+    slotsContainer.innerHTML = `<p style="color:#94a3b8;">${dict.loading_slots}</p>`;
 
     try {
         const response = await fetch(`/api/doctors/${selectedDoctor.id}/slots?date=${selectedDate}`);
@@ -842,12 +898,12 @@ async function loadTimeSlots() {
             `;
         });
 
-        slotsContainer.innerHTML = html || '<p style="color:#94a3b8;">No slots available</p>';
+        slotsContainer.innerHTML = html || `<p style="color:#94a3b8;">${dict.no_slots}</p>`;
 
         // Update button state
         const bookBtn = document.getElementById('bookBtn');
         bookBtn.disabled = true;
-        bookBtn.textContent = 'Select a time slot';
+        bookBtn.textContent = dict.btn_select_time;
     } catch (error) {
         console.error('Failed to load slots:', error);
         slotsContainer.innerHTML = '<p style="color:#ef4444;">Failed to load slots</p>';
@@ -870,10 +926,11 @@ function selectTimeSlot(time, element) {
     element.classList.add('selected');
     selectedSlot = time;
 
+    const dict = app.translations[app.lang];
     // Enable book button
     const bookBtn = document.getElementById('bookBtn');
     bookBtn.disabled = false;
-    bookBtn.textContent = `Book ${formatTime(time)} with ${selectedDoctor.name}`;
+    bookBtn.textContent = dict.btn_book_with.replace('{time}', formatTime(time)).replace('{doctor}', selectedDoctor.name);
 }
 
 async function confirmBooking() {
@@ -908,21 +965,24 @@ async function confirmBooking() {
         }
 
         const displayTime = `${selectedDate} at ${formatTime(selectedSlot)}`;
+        const dict = app.translations[app.lang];
 
         const modal = document.getElementById('bookingModal');
         const modalBody = document.getElementById('modalBody');
+        const docSpecialty = dict[selectedDoctor.specialty] || selectedDoctor.specialty;
+
         modalBody.innerHTML = `
         <div class="booking-success">
                 <div class="success-icon">✓</div>
-                <div class="success-text">Appointment Booked!</div>
-                <p style="color: #94a3b8;">Your appointment has been confirmed.</p>
+                <div class="success-text">${dict.booking_success}</div>
+                <p style="color: #94a3b8;">${dict.booking_confirmed}</p>
                 <div class="booking-details">
-                    <p><strong>Doctor:</strong> ${selectedDoctor.name}</p>
-                    <p><strong>Specialty:</strong> ${selectedDoctor.specialty}</p>
-                    <p><strong>Date & Time:</strong> ${displayTime}</p>
-                    <p><strong>Confirmation #:</strong> MED-${Math.random().toString(36).substr(2, 8).toUpperCase()}</p>
+                    <p><strong>${dict.doc_label}</strong> ${selectedDoctor.name}</p>
+                    <p><strong>${dict.spec_label}</strong> ${docSpecialty}</p>
+                    <p><strong>${dict.datetime_label}</strong> ${displayTime}</p>
+                    <p><strong>${dict.conf_label}</strong> MED-${Math.random().toString(36).substr(2, 8).toUpperCase()}</p>
                 </div>
-                <button class="book-btn" onclick="closeBookingModal()" style="margin-top: 20px;">Done</button>
+                <button class="book-btn" onclick="closeBookingModal()" style="margin-top: 20px;">${dict.done}</button>
             </div>
         `;
 
