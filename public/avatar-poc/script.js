@@ -65,7 +65,38 @@ const app = {
             "Cardiologist": "Cardiologist",
             "Dermatologist": "Dermatologist",
             "Neurologist": "Neurologist",
-            "Pediatrician": "Pediatrician"
+            "Pediatrician": "Pediatrician",
+            // More Booking/Prescription
+            loading_prescriptions: "Loading prescriptions...",
+            no_prescriptions: "No active prescriptions.",
+            no_notes: "No notes",
+            prescribed_by: "Prescribed by {doctor} on {date}",
+            loading_bookings: "Loading bookings...",
+            no_bookings: "No appointments found. Book a doctor to get started!",
+            upcoming: "Upcoming",
+            general: "General",
+            reason_label: "Reason:",
+            at: "at",
+            // Call UI
+            incoming_call: "Incoming Call",
+            calling_you: "{doctor} is calling you for your consultation",
+            accept: "Accept",
+            decline: "Decline",
+            in_call_with: "In Call with Doctor",
+            connected_speak: "Connected - speak to see transcription",
+            listening: "Listening...",
+            unmute: "Unmute",
+            // Doctor Dashboard
+            loading_appointments: "Loading appointments...",
+            walkin_patient: "Walk-in Patient",
+            general_consultation: "General Consultation",
+            no_history: "No prior medical records for this patient.",
+            generating_summary: "Generating AI Summary from patient chat...",
+            analyzing_hints: "Analyzing for diagnosis hints...",
+            waiting_patient: "Waiting for patient to join...",
+            call_ended: "Call ended",
+            fill_rx_alert: "Please fill in medicine and dosage.",
+            rx_success_alert: "Prescription sent successfully!"
         },
         ur: {
             app_title: "میڈ اسسٹ اے آئی",
@@ -123,7 +154,38 @@ const app = {
             "Cardiologist": "ماہر امراض قلب",
             "Dermatologist": "ماہر امراض جلد",
             "Neurologist": "ماہر امراض اعصاب",
-            "Pediatrician": "ماہر امراض اطفال"
+            "Pediatrician": "ماہر امراض اطفال",
+            // More Booking/Prescription
+            loading_prescriptions: "نسخے لوڈ ہو رہے ہیں...",
+            no_prescriptions: "کوئی فعال نسخہ نہیں ملا۔",
+            no_notes: "بغیر نوٹ",
+            prescribed_by: "{date} کو {doctor} نے تجویز کیا",
+            loading_bookings: "بکنگ لوڈ ہو رہی ہے...",
+            no_bookings: "کوئی ٹائم نہیں ملا۔ شروع کرنے کے لیے ڈاکٹر بک کریں!",
+            upcoming: "آنے والا",
+            general: "جنرل",
+            reason_label: "وجہ:",
+            at: "بوقت",
+            // Call UI
+            incoming_call: "کال آ رہی ہے",
+            calling_you: "{doctor} آپ کو مشورے کے لیے کال کر رہے ہیں",
+            accept: "قبول کریں",
+            decline: "مسترد کریں",
+            in_call_with: "ڈاکٹر کے ساتھ کال پر",
+            connected_speak: "منسلک ہے - ٹرانسکرپشن دیکھنے کے لیے بولیں",
+            listening: "سن رہا ہے...",
+            unmute: "ان میوٹ",
+            // Doctor Dashboard
+            loading_appointments: "اپائنٹمنٹس لوڈ ہو رہی ہیں...",
+            walkin_patient: "عام مریض",
+            general_consultation: "جنرل مشورہ",
+            no_history: "اس مریض کا کوئی سابقہ طبی ریکارڈ نہیں ہے۔",
+            generating_summary: "مریض کی چیٹ سے اے آئی خلاصہ تیار کیا جا رہا ہے...",
+            analyzing_hints: "تشخیص کے اشاروں کا تجزیہ کیا جا رہا ہے...",
+            waiting_patient: "مریض کے شامل ہونے کا انتظار کر رہے ہیں...",
+            call_ended: "کال ختم ہوگئی",
+            fill_rx_alert: "براہ کرم دوا اور خوراک درج کریں۔",
+            rx_success_alert: "نسخہ کامیابی کے ساتھ بھیج دیا گیا ہے!"
         }
     },
 
@@ -234,28 +296,36 @@ const app = {
     async showPatientPrescriptions() {
         const modal = document.getElementById('prescriptionModal');
         const listBody = document.getElementById('rxListBody');
+        const dict = this.translations[this.lang];
 
-        listBody.innerHTML = '<p style="text-align:center; color:#94a3b8">Loading prescriptions...</p>';
+        listBody.innerHTML = `<p style="text-align:center; color:#94a3b8">${dict.loading_prescriptions}</p>`;
         modal.classList.add('active');
 
         const prescriptions = await StorageService.getPrescriptions();
 
         if (prescriptions.length === 0) {
-            listBody.innerHTML = '<p style="text-align:center; color:#94a3b8">No active prescriptions.</p>';
+            listBody.innerHTML = `<p style="text-align:center; color:#94a3b8">${dict.no_prescriptions}</p>`;
         } else {
-            listBody.innerHTML = prescriptions.map(rx => `
-                <div class="rx-card" style="background:#0f172a; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #334155;">
-                    <strong style="color:#e2e8f0; display:block; margin-bottom:5px;">${rx.medicine} (${rx.dosage})</strong>
-                    <div style="font-size:0.9rem; color:#94a3b8; margin-bottom:5px;">${rx.notes || 'No notes'}</div>
-                    <div style="font-size:0.8rem; color:#38bdf8;">Prescribed by ${rx.doctorName} on ${rx.date}</div>
-                </div>
-            `).join('');
+            listBody.innerHTML = prescriptions.map(rx => {
+                const prescribedText = dict.prescribed_by
+                    .replace('{doctor}', rx.doctorName)
+                    .replace('{date}', rx.date);
+
+                return `
+                    <div class="rx-card" style="background:#0f172a; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #334155;">
+                        <strong style="color:#e2e8f0; display:block; margin-bottom:5px;">${rx.medicine} (${rx.dosage})</strong>
+                        <div style="font-size:0.9rem; color:#94a3b8; margin-bottom:5px;">${rx.notes || dict.no_notes}</div>
+                        <div style="font-size:0.8rem; color:#38bdf8;">${prescribedText}</div>
+                    </div>
+                `;
+            }).join('');
         }
     },
 
     async showPatientBookings() {
         const user = getCurrentUser();
         if (!user) return;
+        const dict = this.translations[this.lang];
 
         // Create modal if not exists
         let modal = document.getElementById('bookingsModal');
@@ -266,7 +336,7 @@ const app = {
             modal.innerHTML = `
                 <div class="modal">
                     <div class="modal-header">
-                        <h2>📅 My Bookings</h2>
+                        <h2 data-t="my_bookings">${dict.my_bookings}</h2>
                         <button class="close-btn" onclick="document.getElementById('bookingsModal').classList.remove('active')">×</button>
                     </div>
                     <div class="modal-body" id="bookingsListBody"></div>
@@ -276,7 +346,7 @@ const app = {
         }
 
         const listBody = document.getElementById('bookingsListBody');
-        listBody.innerHTML = '<p style="text-align:center; color:#94a3b8">Loading bookings...</p>';
+        listBody.innerHTML = `<p style="text-align:center; color:#94a3b8">${dict.loading_bookings}</p>`;
         modal.classList.add('active');
 
         try {
@@ -284,27 +354,31 @@ const app = {
             const appointments = await response.json();
 
             if (appointments.length === 0) {
-                listBody.innerHTML = '<p style="text-align:center; color:#94a3b8">No appointments found. Book a doctor to get started!</p>';
+                listBody.innerHTML = `<p style="text-align:center; color:#94a3b8">${dict.no_bookings}</p>`;
             } else {
                 listBody.innerHTML = appointments.map(appt => {
+                    const statusKey = appt.status.toLowerCase();
+                    const statusText = dict[statusKey] || appt.status;
                     const statusColor = appt.status === 'upcoming' ? '#4ade80' : '#94a3b8';
-                    const formattedDate = new Date(appt.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    const formattedDate = new Date(appt.date).toLocaleDateString(this.lang === 'ur' ? 'ur-PK' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    const specialtyText = dict[appt.specialty] || appt.specialty || dict.general;
+
                     return `
                         <div class="booking-card" style="background:#0f172a; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #334155;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                                 <strong style="color:#e2e8f0;">Dr. ${appt.doctor_name}</strong>
-                                <span style="color:${statusColor}; font-size:0.8rem; text-transform:uppercase;">${appt.status}</span>
+                                <span style="color:${statusColor}; font-size:0.8rem; text-transform:uppercase;">${statusText}</span>
                             </div>
-                            <div style="font-size:0.9rem; color:#38bdf8; margin-bottom:5px;">${appt.specialty || 'General'}</div>
-                            <div style="font-size:0.85rem; color:#94a3b8;">📅 ${formattedDate} at ${appt.time}</div>
-                            ${appt.reason ? `<div style="font-size:0.85rem; color:#64748b; margin-top:5px;">Reason: ${appt.reason}</div>` : ''}
+                            <div style="font-size:0.9rem; color:#38bdf8; margin-bottom:5px;">${specialtyText}</div>
+                            <div style="font-size:0.85rem; color:#94a3b8;">📅 ${formattedDate} ${dict.at} ${formatTime(appt.time)}</div>
+                            ${appt.reason ? `<div style="font-size:0.85rem; color:#64748b; margin-top:5px;">${dict.reason_label} ${appt.reason}</div>` : ''}
                         </div>
                     `;
                 }).join('');
             }
         } catch (error) {
             console.error('Failed to load bookings:', error);
-            listBody.innerHTML = '<p style="text-align:center; color:#ef4444">Failed to load bookings</p>';
+            listBody.innerHTML = `<p style="text-align:center; color:#ef4444">${dict.loading_bookings} (Error)</p>`;
         }
     }
 };
@@ -987,7 +1061,11 @@ async function confirmBooking() {
         `;
 
         // Add confirmation to chat
-        addMessage(`Great! I've booked your appointment with ${selectedDoctor.name} for ${displayTime}. You'll receive a confirmation shortly.`);
+        if (app.lang === 'ur') {
+            addMessage(`بہترین! میں نے ${selectedDoctor.name} کے ساتھ آپ کی اپائنٹمنٹ ${displayTime} کے لیے بک کر لی ہے۔ آپ کو جلد ہی تصدیق موصول ہو جائے گی۔`);
+        } else {
+            addMessage(`Great! I've booked your appointment with ${selectedDoctor.name} for ${displayTime}. You'll receive a confirmation shortly.`);
+        }
     } catch (error) {
         console.error('Booking failed:', error);
         alert('An error occurred while booking. Please try again.');
@@ -1111,14 +1189,17 @@ function showIncomingCallBanner(doctorName, appointmentId) {
     // Store appointment ID for when patient accepts
     window.pendingCallAppointmentId = appointmentId;
 
+    const dict = app.translations[app.lang];
+    const callingText = dict.calling_you.replace('{doctor}', doctorName);
+
     const banner = document.createElement('div');
     banner.className = 'incoming-call-banner';
     banner.innerHTML = `
-        <h3>📞 Incoming Call</h3>
-        <p>${doctorName} is calling you for your consultation</p>
+        <h3>📞 ${dict.incoming_call}</h3>
+        <p>${callingText}</p>
         <div class="call-actions">
-            <button class="btn btn-call" onclick="acceptIncomingCall()">✓ Accept</button>
-            <button class="btn btn-end-call" onclick="declineIncomingCall()">✗ Decline</button>
+            <button class="btn btn-call" onclick="acceptIncomingCall()">✓ ${dict.accept}</button>
+            <button class="btn btn-end-call" onclick="declineIncomingCall()">✗ ${dict.decline}</button>
         </div>
     `;
     document.body.appendChild(banner);
@@ -1151,18 +1232,20 @@ function showPatientInCallUI() {
     const existing = document.querySelector('.patient-in-call-ui');
     if (existing) existing.remove();
 
+    const dict = app.translations[app.lang];
+
     const inCallUI = document.createElement('div');
     inCallUI.className = 'patient-in-call-ui incoming-call-banner';
     inCallUI.style.border = '2px solid #22c55e';
     inCallUI.innerHTML = `
-        <h3>🎙️ In Call with Doctor</h3>
-        <p id="patientCallStatus" style="color: #4ade80;">Connected - speak to see transcription</p>
+        <h3>🎙️ ${dict.in_call_with}</h3>
+        <p id="patientCallStatus" style="color: #4ade80;">${dict.connected_speak}</p>
         <div id="patientTranscript" style="max-height: 150px; overflow-y: auto; text-align: left; margin: 10px 0; padding: 10px; background: #0f172a; border-radius: 8px; font-size: 0.9rem;">
-            <p style="color: #64748b; font-style: italic;">Listening...</p>
+            <p style="color: #64748b; font-style: italic;">${dict.listening}</p>
         </div>
         <div class="call-actions">
-            <button id="patientMuteBtn" class="btn btn-mute" onclick="CallManager.toggleMute(); updatePatientMuteBtn()">🎤 Mute</button>
-            <button class="btn btn-end-call" onclick="endPatientCall()">📞 End Call</button>
+            <button id="patientMuteBtn" class="btn btn-mute" onclick="CallManager.toggleMute(); updatePatientMuteBtn()">${dict.mic} ${dict.mute}</button>
+            <button class="btn btn-end-call" onclick="endPatientCall()">📞 ${dict.end_call}</button>
         </div>
     `;
     document.body.appendChild(inCallUI);
@@ -1194,7 +1277,8 @@ function declineIncomingCall() {
 function updatePatientMuteBtn() {
     const btn = document.getElementById('patientMuteBtn');
     if (btn) {
-        btn.textContent = CallManager.isMuted ? '🔇 Unmute' : '🎤 Mute';
+        const dict = app.translations[app.lang];
+        btn.textContent = CallManager.isMuted ? `🔇 ${dict.unmute}` : `${dict.mic} ${dict.mute}`;
     }
 }
 

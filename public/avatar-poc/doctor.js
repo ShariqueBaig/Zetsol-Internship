@@ -26,9 +26,10 @@ const doctorApp = {
     // Render the list of upcoming appointments from API
     async renderAppointments() {
         const list = document.getElementById('appointmentList');
+        const dict = app.translations[app.lang];
 
         // Show loading state
-        list.innerHTML = `<div class="empty-state">Loading appointments...</div>`;
+        list.innerHTML = `<div class="empty-state">${dict.loading_appointments}</div>`;
 
         try {
             // Fetch appointments from API
@@ -49,20 +50,24 @@ const doctorApp = {
             const upcoming = relevantAppointments.filter(a => a.status === 'upcoming').reverse();
 
             if (upcoming.length === 0) {
-                list.innerHTML = `<div class="empty-state">No appointments today</div>`;
+                list.innerHTML = `<div class="empty-state">${dict.no_appointments}</div>`;
                 return;
             }
 
-            list.innerHTML = upcoming.map(appt => `
-                <div class="appointment-card" onclick="doctorApp.startConsultation(${appt.id})">
-                    <div class="appt-time">${appt.time}</div>
-                    <div class="appt-details">
-                        <strong>${appt.patientName || 'Patient'}</strong>
-                        <span>${appt.status}</span>
+            list.innerHTML = upcoming.map(appt => {
+                const statusText = dict[appt.status.toLowerCase()] || appt.status;
+
+                return `
+                    <div class="appointment-card" onclick="doctorApp.startConsultation(${appt.id})">
+                        <div class="appt-time">${appt.time}</div>
+                        <div class="appt-details">
+                            <strong>${appt.patientName || dict.patient}</strong>
+                            <span>${statusText}</span>
+                        </div>
+                        <div class="appt-action">ᐳ</div>
                     </div>
-                    <div class="appt-action">ᐳ</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         } catch (error) {
             console.error('Failed to load appointments:', error);
             list.innerHTML = `<div class="empty-state">Failed to load appointments</div>`;
@@ -79,15 +84,17 @@ const doctorApp = {
         document.querySelector('.empty-consultation').style.display = 'none';
         document.getElementById('activeConsultation').style.display = 'block';
 
-        document.getElementById('currentPatientName').textContent = this.currentAppointment.patientName || 'Walk-in Patient';
-        document.getElementById('visitReason').textContent = this.currentAppointment.specialty || 'General Consultation';
+        const dict = app.translations[app.lang];
+
+        document.getElementById('currentPatientName').textContent = this.currentAppointment.patientName || dict.walkin_patient;
+        document.getElementById('visitReason').textContent = dict[this.currentAppointment.specialty] || this.currentAppointment.specialty || dict.general_consultation;
 
         // Display Patient Medical History from database
         const historyBox = document.getElementById('medicalHistory');
         if (this.currentAppointment.medicalHistory && this.currentAppointment.medicalHistory.trim()) {
             historyBox.innerHTML = `<p style="color: #e2e8f0; white-space: pre-line;">${this.currentAppointment.medicalHistory}</p>`;
         } else {
-            historyBox.innerHTML = '<span class="placeholder" style="color: #64748b;">No prior medical records for this patient.</span>';
+            historyBox.innerHTML = `<span class="placeholder" style="color: #64748b;">${dict.no_history}</span>`;
         }
 
         // Use REAL Chat History if available
@@ -102,9 +109,10 @@ const doctorApp = {
         const summaryBox = document.getElementById('aiSummary');
         const hintsBox = document.getElementById('aiHints');
         const transcriptionBox = document.getElementById('liveTranscription');
+        const dict = app.translations[app.lang];
 
-        summaryBox.innerHTML = '<span class="typing-text">Generating AI Summary from patient chat...</span>';
-        hintsBox.innerHTML = '<span class="typing-text" style="color: #fbbf24;">Analyzing for diagnosis hints...</span>';
+        summaryBox.innerHTML = `<span class="typing-text">${dict.generating_summary}</span>`;
+        hintsBox.innerHTML = `<span class="typing-text" style="color: #fbbf24;">${dict.analyzing_hints}</span>`;
 
         // Show raw chat log immediately
         transcriptionBox.innerHTML = chatLog.replace(/\n/g, '<br>');
@@ -244,9 +252,10 @@ const doctorApp = {
         const medicine = document.getElementById('rxMedicine').value;
         const dosage = document.getElementById('rxDosage').value;
         const notes = document.getElementById('rxNotes').value;
+        const dict = app.translations[app.lang];
 
         if (!medicine || !dosage) {
-            alert('Please fill in medicine and dosage.');
+            alert(dict.fill_rx_alert);
             return;
         }
 
@@ -262,7 +271,7 @@ const doctorApp = {
 
         await StorageService.savePrescription(prescription);
 
-        alert('Prescription sent successfully!');
+        alert(dict.rx_success_alert);
 
         // Clear form
         document.getElementById('rxMedicine').value = '';
@@ -302,7 +311,7 @@ const doctorApp = {
             // Clear transcript for new call
             const transcriptBox = document.getElementById('liveTranscription');
             if (transcriptBox) {
-                transcriptBox.innerHTML = '<p style="color: #64748b; font-style: italic;">Waiting for patient to join...</p>';
+                transcriptBox.innerHTML = `<p style="color: #64748b; font-style: italic;">${app.translations[app.lang].waiting_patient}</p>`;
             }
         }
     },
@@ -314,7 +323,7 @@ const doctorApp = {
         document.getElementById('startCallBtn').style.display = 'inline-block';
         document.getElementById('endCallBtn').style.display = 'none';
         document.getElementById('muteBtn').style.display = 'none';
-        document.getElementById('muteBtn').textContent = '🎤 Mute'; // Reset text
-        document.getElementById('callStatus').textContent = 'Call ended';
+        document.getElementById('muteBtn').textContent = app.translations[app.lang].mic + ' ' + app.translations[app.lang].mute; // Reset text
+        document.getElementById('callStatus').textContent = app.translations[app.lang].call_ended;
     }
 };
