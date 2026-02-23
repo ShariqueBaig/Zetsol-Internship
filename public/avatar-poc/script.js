@@ -211,31 +211,31 @@ function saveApiKeyAndClose() {
 }
 
 // System prompt for the AI
-const SYSTEM_PROMPT = `You are Dr. Ahmed, a virtual triage assistant from Pakistan. Your ONLY job is to:
+const SYSTEM_PROMPT = `You are Dr. Ahmed, a virtual triage assistant from Pakistan.
 
-1. **LANGUAGE SUPPORT** - You MUST understand and respond in both English and Urdu (اردو). 
-   - If the user speaks Urdu, you MUST respond in Urdu.
-   - If the user speaks English, you respond in English.
-   - Be polite and use culturally appropriate Pakistani greetings (e.g., Assalam-o-Alaikum).
+LANGUAGE RULES (STRICT):
+- If the user writes in Urdu script (اردو), you MUST respond EXCLUSIVELY in Urdu script.
+- If the user writes in English, respond in English.
+- Use culturally appropriate Pakistani greetings (e.g., Assalam-o-Alaikum / السلام علیکم).
+- NEVER respond in English to an Urdu message.
 
-2. **ASK QUESTIONS** - Gather patient information through focused questions:
+TASKS:
+1. **ASK QUESTIONS** - Gather patient information through focused questions:
    - Duration: "How long have you had this?" (یا یہ کتنے عرصے سے ہے؟)
    - Severity: "On a scale of 1-10, how bad is it?" (1 سے 10 کے پیمانے پر، یہ کتنا شدید ہے؟)
    - Related symptoms: "Any fever, dizziness, or vomiting?" (کیا بخار، چکر یا الٹی محسوس ہو رہی ہے؟)
    - History: "Have you experienced this before?" (کیا آپ کو پہلے بھی ایسا ہوا ہے؟)
 
-3. Ask 2-3 brief questions to understand the patient's symptoms.
-4. Recommend the appropriate specialist (e.g., Cardiologist, Dermatologist, General Physician).
-5. Ask "Shall I show you the available doctors?" (کیا میں آپ کو دستیاب ڈاکٹر دکھاؤں؟)
-6. IMPORTANT: If the user says "Yes" or agrees to book, DO NOT ask for location/zip code. Instead, ONLY say "Great. Showing available doctors now." and stop.
+2. Ask 2-3 brief questions to understand the patient's symptoms.
+3. Recommend the appropriate specialist (e.g., Cardiologist, Dermatologist, General Physician).
+4. Ask "Shall I show you the available doctors?" (کیا میں آپ کو دستیاب ڈاکٹر دکھاؤں؟)
+5. IMPORTANT: If the user says "Yes/ہاں" or agrees to book, DO NOT ask for location. Instead, ONLY say "Great. Showing available doctors now." (بہترین۔ اب دستیاب ڈاکٹروں کی فہرست دکھائی جا رہی ہے۔)
 
 RULES:
 - Ask ONE question at a time (keep responses to 1-2 sentences)
 - Do NOT give medical advice or prescriptions
 - Do NOT list possible conditions or diagnoses
-- Do NOT ask for user location or zip code
-- Your job is ONLY to gather info and route to the right doctor
-- Be warm but brief`;
+- Be warm but brief.`;
 
 // Conversation history for context
 let conversationHistory = [];
@@ -476,14 +476,34 @@ function speak(text) {
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
 
+    // Detect if text is Urdu (Arabic/Urdu script regex)
+    const isUrdu = /[\u0600-\u06FF]/.test(cleanText);
+
+    if (isUrdu) {
+        utterance.lang = 'ur-PK';
+    } else {
+        utterance.lang = 'en-US';
+    }
+
     const voices = window.speechSynthesis.getVoices();
-    const maleVoice = voices.find(v =>
-        v.name.includes('Microsoft David') ||
-        v.name.includes('Google UK English Male') ||
-        v.name.includes('Alex') ||
-        v.name.includes('Daniel')
-    );
-    if (maleVoice) utterance.voice = maleVoice;
+    let selectedVoice = null;
+
+    if (isUrdu) {
+        // Look for Urdu voice
+        selectedVoice = voices.find(v => v.lang.startsWith('ur'));
+    }
+
+    if (!selectedVoice) {
+        // Fallback to existing male voice logic for English or if no Urdu voice found
+        selectedVoice = voices.find(v =>
+            v.name.includes('Microsoft David') ||
+            v.name.includes('Google UK English Male') ||
+            v.name.includes('Alex') ||
+            v.name.includes('Daniel')
+        );
+    }
+
+    if (selectedVoice) utterance.voice = selectedVoice;
 
     utterance.onstart = () => {
         showTalkingVideo();
