@@ -159,12 +159,12 @@
                                 <span class="placeholder">No prior medical records</span>
                             </div>
 
-                            <h4 style="margin-top: 20px">AI Patient Summary</h4>
+                            <h4 style="margin-top: 20px" data-t="ai_summary">AI Patient Summary</h4>
                             <div class="ai-card" id="aiSummary">
                                 Loading AI summary...
                             </div>
 
-                            <h4 style="margin-top: 20px">💬 Chat History</h4>
+                            <h4 style="margin-top: 20px" data-t="chat_history">💬 Chat History</h4>
                             <div class="transcription-box" id="liveTranscription">
                                 <span class="placeholder">No chat transcript available</span>
                             </div>
@@ -199,24 +199,24 @@
         <div class="mobile-nav-items">
             <button class="mobile-nav-item active" onclick="mobileNav.goto('home')">
                 <span class="nav-icon">🏠</span>
-                <span>Home</span>
+                <span data-t="home_nav">Home</span>
             </button>
             <button class="mobile-nav-item" onclick="mobileNav.goto('bookings')">
                 <span class="nav-icon">📅</span>
-                <span>Bookings</span>
+                <span data-t="bookings_nav">Bookings</span>
             </button>
             <button class="mobile-nav-item" onclick="mobileNav.goto('prescriptions')">
                 <span class="nav-icon">💊</span>
-                <span>Rx</span>
+                <span data-t="rx_nav">Rx</span>
             </button>
             <button class="mobile-nav-item" onclick="mobileNav.goto('settings')">
                 <span class="nav-icon">⚙️</span>
-                <span>Settings</span>
+                <span data-t="settings_nav">Settings</span>
             </button>
         </div>
     </nav>
 
-    <div class="footer">
+    <div class="footer" data-t="footer_note">
         MedAssist AI POC • Powered by Google Gemini • For education only
     </div>
 
@@ -225,7 +225,7 @@
         <!-- Re-using existing booking modal structure -->
         <div class="modal">
             <div class="modal-header">
-                <h2>Book an Appointment</h2>
+                <h2 data-t="book_doctor">Book an Appointment</h2>
                 <button class="close-btn" onclick="closeBookingModal()">×</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
@@ -236,7 +236,7 @@
     <div class="modal-overlay" id="prescriptionModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>My Prescriptions</h2>
+                <h2 data-t="my_prescriptions">My Prescriptions</h2>
                 <button class="close-btn"
                     onclick="document.getElementById('prescriptionModal').classList.remove('active')">×</button>
             </div>
@@ -248,7 +248,7 @@
     <div class="modal-overlay" id="doctorLoginModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>Select Doctor Profile</h2>
+                <h2 data-t="doctor_login_title">Select Doctor Profile</h2>
                 <button class="close-btn"
                     onclick="document.getElementById('doctorLoginModal').classList.remove('active')">×</button>
             </div>
@@ -262,20 +262,20 @@
     <div class="modal-overlay" id="apiKeyModal">
         <div class="modal">
             <div class="modal-header">
-                <h2>🔑 API Key Setup</h2>
+                <h2 data-t="api_setup">🔑 API Key Setup</h2>
             </div>
             <div class="modal-body" style="padding: 20px;">
-                <p style="color: #94a3b8; margin-bottom: 15px;">
+                <p style="color: #94a3b8; margin-bottom: 15px;" data-t="api_help">
                     Enter your Gemini API key to enable AI features.
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #38bdf8;">Get one
                         free here →</a>
                 </p>
                 <input type="password" id="apiKeyInput" class="form-input" placeholder="AIza..."
                     style="width: 100%; margin-bottom: 15px; font-family: monospace;">
-                <button class="btn btn-primary" style="width: 100%;" onclick="saveApiKeyAndClose()">
+                <button class="btn btn-primary" style="width: 100%;" onclick="saveApiKeyAndClose()" data-t="save_api">
                     Save API Key
                 </button>
-                <p style="color: #64748b; font-size: 0.8rem; margin-top: 15px; text-align: center;">
+                <p style="color: #64748b; font-size: 0.8rem; margin-top: 15px; text-align: center;" data-t="api_local">
                     🔒 Key is stored locally in your browser only
                 </p>
             </div>

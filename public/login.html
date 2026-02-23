@@ -201,45 +201,82 @@
             color: #64748b;
             font-size: 0.8rem;
         }
+
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .lang-btn {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+        }
+
+        /* RTL Styles */
+        body.rtl {
+            direction: rtl;
+        }
+
+        body.rtl .lang-toggle {
+            right: auto;
+            left: 20px;
+        }
     </style>
 </head>
 
 <body>
+    <div class="lang-toggle">
+        <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">Urdu / اردو</button>
+    </div>
+
     <div class="login-container">
         <div class="logo">
-            <h1>MedAssist AI</h1>
-            <p>Your Virtual Health Assistant</p>
+            <h1 data-t="app_title">MedAssist AI</h1>
+            <p data-t="patient_subtitle">Your Virtual Health Assistant</p>
         </div>
 
         <div class="role-tabs">
-            <button class="role-tab active" onclick="switchRole('patient')">👤 Patient</button>
-            <button class="role-tab" onclick="switchRole('doctor')">🩺 Doctor</button>
+            <button class="role-tab active" data-t="patient" onclick="switchRole('patient')">👤 Patient</button>
+            <button class="role-tab" data-t="doctor" onclick="switchRole('doctor')">🩺 Doctor</button>
         </div>
 
         <div class="error-message" id="errorMessage"></div>
 
         <form onsubmit="handleLogin(event)">
             <div class="form-group">
-                <label for="email">Email Address</label>
+                <label for="email" data-t="email_label">Email Address</label>
                 <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password" data-t="password_label">Password</label>
                 <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
             </div>
 
-            <button type="submit" class="login-btn" id="loginBtn">
+            <button type="submit" class="login-btn" id="loginBtn" data-t="login_title">
                 Sign In
             </button>
         </form>
 
         <div class="demo-accounts">
-            <h4>Demo Accounts (click to fill)</h4>
+            <h4 data-t="demo_accounts">Demo Accounts (click to fill)</h4>
             <div id="demoAccountsList"></div>
         </div>
 
-        <p class="footer-note">
+        <p class="footer-note" data-t="poc_note">
             🔒 MedAssist AI POC • For demonstration only
         </p>
     </div>
@@ -247,6 +284,56 @@
     <script>
         const API_BASE = '/api';
         let currentRole = 'patient';
+        let currentLang = localStorage.getItem('medassist_lang') || 'en';
+
+        const translations = {
+            en: {
+                app_title: "MedAssist AI",
+                patient_subtitle: "Your Virtual Health Assistant",
+                patient: "👤 Patient",
+                doctor: "🩺 Doctor",
+                email_label: "Email Address",
+                password_label: "Password",
+                login_title: "Sign In",
+                signing_in: "Signing in...",
+                demo_accounts: "Demo Accounts (click to fill)",
+                poc_note: "🔒 MedAssist AI POC • For demonstration only",
+                lang_btn: "Urdu / اردو"
+            },
+            ur: {
+                app_title: "میڈ اسسٹ اے آئی",
+                patient_subtitle: "آپ کا ورچوئل ہیلتھ اسسٹنٹ",
+                patient: "👤 مریض",
+                doctor: "🩺 ڈاکٹر",
+                email_label: "ای میل ایڈریس",
+                password_label: "پاس ورڈ",
+                login_title: "سائن ان کریں",
+                signing_in: "سائن ان ہو رہا ہے...",
+                demo_accounts: "ڈیمو اکاؤنٹس (بھرنے کے لیے کلک کریں)",
+                poc_note: "🔒 میڈ اسسٹ اے آئی POC • صرف ڈیمو کے لیے",
+                lang_btn: "English / انگریزی"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ur' : 'en';
+            localStorage.setItem('medassist_lang', currentLang);
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                if (t[key]) el.textContent = t[key];
+            });
+
+            document.getElementById('langBtn').textContent = t.lang_btn;
+            document.body.className = currentLang === 'ur' ? 'rtl' : '';
+
+            // Re-render demo accounts to update their look (button text etc)
+            renderDemoAccounts();
+        }
 
         const demoAccounts = {
             patient: [
@@ -284,7 +371,7 @@
                         <div class="name">${acc.name}</div>
                         <div class="email">${acc.email}</div>
                     </div>
-                    <span class="fill-btn">Fill →</span>
+                    <span class="fill-btn">${currentLang === 'ur' ? 'بھریں ←' : 'Fill →'}</span>
                 </div>
             `).join('');
         }
@@ -313,7 +400,7 @@
             const loginBtn = document.getElementById('loginBtn');
 
             loginBtn.disabled = true;
-            loginBtn.textContent = 'Signing in...';
+            loginBtn.textContent = translations[currentLang].signing_in;
             hideError();
 
             try {
@@ -340,7 +427,7 @@
                 showError(error.message);
             } finally {
                 loginBtn.disabled = false;
-                loginBtn.textContent = 'Sign In';
+                loginBtn.textContent = translations[currentLang].login_title;
             }
         }
 
@@ -350,6 +437,7 @@
         }
 
         // Initial render
+        applyLanguage();
         renderDemoAccounts();
     </script>
 

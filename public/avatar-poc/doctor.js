@@ -26,10 +26,9 @@ const doctorApp = {
     // Render the list of upcoming appointments from API
     async renderAppointments() {
         const list = document.getElementById('appointmentList');
-        const dict = app.translations[app.lang];
 
         // Show loading state
-        list.innerHTML = `<div class="empty-state">${dict.loading_appointments}</div>`;
+        list.innerHTML = `<div class="empty-state">${app.t('loading_slots')}</div>`;
 
         try {
             // Fetch appointments from API
@@ -50,27 +49,23 @@ const doctorApp = {
             const upcoming = relevantAppointments.filter(a => a.status === 'upcoming').reverse();
 
             if (upcoming.length === 0) {
-                list.innerHTML = `<div class="empty-state">${dict.no_appointments}</div>`;
+                list.innerHTML = `<div class="empty-state">${app.t('no_appointments')}</div>`;
                 return;
             }
 
-            list.innerHTML = upcoming.map(appt => {
-                const statusText = dict[appt.status.toLowerCase()] || appt.status;
-
-                return `
-                    <div class="appointment-card" onclick="doctorApp.startConsultation(${appt.id})">
-                        <div class="appt-time">${appt.time}</div>
-                        <div class="appt-details">
-                            <strong>${appt.patientName || dict.patient}</strong>
-                            <span>${statusText}</span>
-                        </div>
-                        <div class="appt-action">ᐳ</div>
+            list.innerHTML = upcoming.map(appt => `
+                <div class="appointment-card" onclick="doctorApp.startConsultation(${appt.id})">
+                    <div class="appt-time">${appt.time}</div>
+                    <div class="appt-details">
+                        <strong>${appt.patientName || 'Patient'}</strong>
+                        <span>${appt.status}</span>
                     </div>
-                `;
-            }).join('');
+                    <div class="appt-action">ᐳ</div>
+                </div>
+            `).join('');
         } catch (error) {
             console.error('Failed to load appointments:', error);
-            list.innerHTML = `<div class="empty-state">Failed to load appointments</div>`;
+            list.innerHTML = `<div class="empty-state">${app.t('no_appointments')}</div>`;
         }
     },
 
@@ -84,17 +79,15 @@ const doctorApp = {
         document.querySelector('.empty-consultation').style.display = 'none';
         document.getElementById('activeConsultation').style.display = 'block';
 
-        const dict = app.translations[app.lang];
-
-        document.getElementById('currentPatientName').textContent = this.currentAppointment.patientName || dict.walkin_patient;
-        document.getElementById('visitReason').textContent = dict[this.currentAppointment.specialty] || this.currentAppointment.specialty || dict.general_consultation;
+        document.getElementById('currentPatientName').textContent = this.currentAppointment.patientName || 'Walk-in Patient';
+        document.getElementById('visitReason').textContent = this.currentAppointment.specialty || 'General Consultation';
 
         // Display Patient Medical History from database
         const historyBox = document.getElementById('medicalHistory');
         if (this.currentAppointment.medicalHistory && this.currentAppointment.medicalHistory.trim()) {
             historyBox.innerHTML = `<p style="color: #e2e8f0; white-space: pre-line;">${this.currentAppointment.medicalHistory}</p>`;
         } else {
-            historyBox.innerHTML = `<span class="placeholder" style="color: #64748b;">${dict.no_history}</span>`;
+            historyBox.innerHTML = `<span class="placeholder" style="color: #64748b;">${app.t('no_prior_history') || 'No prior medical records'}</span>`;
         }
 
         // Use REAL Chat History if available
@@ -109,10 +102,9 @@ const doctorApp = {
         const summaryBox = document.getElementById('aiSummary');
         const hintsBox = document.getElementById('aiHints');
         const transcriptionBox = document.getElementById('liveTranscription');
-        const dict = app.translations[app.lang];
 
-        summaryBox.innerHTML = `<span class="typing-text">${dict.generating_summary}</span>`;
-        hintsBox.innerHTML = `<span class="typing-text" style="color: #fbbf24;">${dict.analyzing_hints}</span>`;
+        summaryBox.innerHTML = `<span class="typing-text">${app.t('thinking')}</span>`;
+        hintsBox.innerHTML = `<span class="typing-text" style="color: #fbbf24;">${app.t('thinking')}</span>`;
 
         // Show raw chat log immediately
         transcriptionBox.innerHTML = chatLog.replace(/\n/g, '<br>');
@@ -212,11 +204,11 @@ const doctorApp = {
 
         } catch (e) {
             console.error("AI Analysis Failed", e);
-            summaryBox.innerHTML = "Failed to generate AI summary. Please review chat logs.";
+            summaryBox.innerHTML = app.lang === 'ur' ? "اے آئی خلاصہ بنانے میں ناکام۔ براہ کرم چیٹ لاگز کا جائزہ لیں۔" : "Failed to generate AI summary. Please review chat logs.";
             hintsBox.innerHTML = `
-                <div class="hint-tag">Review Symptoms</div>
-                <div class="hint-tag">Check Vitals</div>
-                <div class="hint-tag">Compare with History</div>
+                <div class="hint-tag">${app.lang === 'ur' ? 'علامات چیک کریں' : 'Review Symptoms'}</div>
+                <div class="hint-tag">${app.lang === 'ur' ? 'وائٹلز چیک کریں' : 'Check Vitals'}</div>
+                <div class="hint-tag">${app.lang === 'ur' ? 'تاریخ سے موازنہ کریں' : 'Compare with History'}</div>
             `;
         }
     },
@@ -252,10 +244,9 @@ const doctorApp = {
         const medicine = document.getElementById('rxMedicine').value;
         const dosage = document.getElementById('rxDosage').value;
         const notes = document.getElementById('rxNotes').value;
-        const dict = app.translations[app.lang];
 
         if (!medicine || !dosage) {
-            alert(dict.fill_rx_alert);
+            alert(app.lang === 'ur' ? 'براہ کرم دوا اور خوراک درج کریں۔' : 'Please fill in medicine and dosage.');
             return;
         }
 
@@ -271,7 +262,7 @@ const doctorApp = {
 
         await StorageService.savePrescription(prescription);
 
-        alert(dict.rx_success_alert);
+        alert(app.lang === 'ur' ? 'نسخہ کامیابی سے بھیج دیا گیا!' : 'Prescription sent successfully!');
 
         // Clear form
         document.getElementById('rxMedicine').value = '';
@@ -311,7 +302,7 @@ const doctorApp = {
             // Clear transcript for new call
             const transcriptBox = document.getElementById('liveTranscription');
             if (transcriptBox) {
-                transcriptBox.innerHTML = `<p style="color: #64748b; font-style: italic;">${app.translations[app.lang].waiting_patient}</p>`;
+                transcriptBox.innerHTML = `<p style="color: #64748b; font-style: italic;">${app.t('waiting_patient') || 'Waiting for patient...'}</p>`;
             }
         }
     },
@@ -323,7 +314,7 @@ const doctorApp = {
         document.getElementById('startCallBtn').style.display = 'inline-block';
         document.getElementById('endCallBtn').style.display = 'none';
         document.getElementById('muteBtn').style.display = 'none';
-        document.getElementById('muteBtn').textContent = app.translations[app.lang].mic + ' ' + app.translations[app.lang].mute; // Reset text
-        document.getElementById('callStatus').textContent = app.translations[app.lang].call_ended;
+        document.getElementById('muteBtn').textContent = app.t('mute'); // Reset text
+        document.getElementById('callStatus').textContent = app.lang === 'ur' ? 'کال ختم ہو گئی' : 'Call ended';
     }
 };
